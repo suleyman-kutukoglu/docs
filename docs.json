@@ -15,7 +15,7 @@
         "groups": [
           {
             "group": "Getting started",
-            "pages": ["en/overview", "en/quickstart", "en/development"]
+            "pages": ["en/index", "en/quickstart", "en/development"]
           }
         ]
       },
