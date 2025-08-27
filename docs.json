@@ -24,7 +24,7 @@
         "groups": [
           {
             "group": "Sanal Makine Operasyonları",
-            "pages": ["tr/windows-vm"]
+            "pages": ["tr/windows-vm", "tr/test-vm"]
           }
         ]
       },

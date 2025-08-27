@@ -1,0 +1,172 @@
+---
+title: "Zadara Edge Cloud'da Windows VM Oluşturma (Demo)"
+date: "2025-08-27"
+tags: ["mdx", "zadara", "windows", "vm", "demo"]
+---
+
+# Zadara Edge Cloud'da Windows VM Oluşturma
+
+> ⚠️ **Not:** Bu doküman demo amaçlıdır; adımlar gerçek ortamda farklı olabilir. Amaç, **MDX yazımını verimli** kullanmaktır.
+
+<div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;margin:12px 0">
+  <strong>Neler Göreceksin?</strong>
+  <ul>
+    <li>Saf Markdown başlıklar, listeler, tablolar</li>
+    <li>Basit HTML (details/summary, kbd, div) kullanımları</li>
+    <li>İç içe giren adımlar ve örnek komutlar (indent ile <em>code block</em>)</li>
+  </ul>
+</div>
+
+---
+
+## 🌐 Ön Koşullar
+
+- Zadara Edge Cloud portal erişimi
+- Windows Server **ISO** veya **hazır template**
+- VM’in bağlanacağı ağ (VLAN/Network) ve depolama (VPSA)
+- RDP için güvenlik kuralı (TCP **3389**) tanımlı olmalı
+
+---
+
+## 1) Yönetim Paneline Giriş
+
+1. Tarayıcıda `https://cloud.zadara.com` adresini aç.
+2. **Compute** menüsüne git.
+3. **Instances → Create** seçeneğini tıkla.
+
+İstersen aşağıdaki gibi bir (temsili) CLI de düşünebilirsin:
+
+    # Temsili: giriş değil, sadece örnek
+    zadara login --username <kullanici> --password <sifre>
+
+> 💡 **İpucu:** MDX’te komut bloklarını üç backtick yerine 4 boşlukla başlatarak da yazabilirsin (bu dosyada öyle yapıyoruz).
+
+---
+
+## 2) İmaj/Template Seçimi
+
+- **Template ile kurulum:** “Image/Template” listesinden `Windows Server 2022` benzeri bir imaj seç.
+- **ISO ile kurulum:** ISO deposundan Windows ISO dosyasını işaretle; ilk önyüklemeyi **CD/DVD** yap.
+
+Örnek (temsili) görüntüleme ve oluşturma:
+
+    # Mevcut imajları listele (temsili)
+    zadara image list --os windows
+
+    # VM oluştur (temsili)
+    zadara vm create \
+      --name win-demo-01 \
+      --image windows-2022-template \
+      --cpu 4 --ram 8GB \
+      --disk 100GB --network prod-net
+
+---
+
+## 3) Kaynakları Belirleme
+
+Aşağıdaki tablo demo önerileridir:
+
+| Kaynak  | Öneri (Demo) |
+|---------|--------------|
+| vCPU    | 4            |
+| RAM     | 8 GB         |
+| Disk    | 100 GB SSD   |
+| Network | prod-net     |
+
+Disk ve ek volume ekleme (temsili):
+
+    # Ek veri diski (200 GB) ekle (temsili)
+    zadara volume create --name vol-win-data --size 200GB --vpsa vpsa-01
+    zadara vm attach-volume --vm win-demo-01 --volume vol-win-data
+
+<details>
+  <summary>🔎 Gelişmiş: NUMA / CPU pinning / Disk türleri</summary>
+  <p>Gerçek ortama göre IOPS/latency hedeflerini belirleyip disk policy tanımlayın. Demo amaçlıdır.</p>
+</details>
+
+---
+
+## 4) Ağ ve Güvenlik
+
+1. VM’i bağlayacağın ağı seç (örn. <kbd>prod-net</kbd>).
+2. Güvenlik grubunda aşağıdakileri doğrula:
+   - **RDP:** TCP 3389 (kaynak: ofis IP aralığın)
+   - **WinRM (opsiyonel):** TCP 5985/5986
+3. Public IP gerekiyorsa ata veya bastion üzerinden eriş.
+
+Örnek (temsili) güvenlik kuralı:
+
+    # RDP kuralı ekle (temsili)
+    zadara secgroup rule add \
+      --group sg-win \
+      --proto tcp --port 3389 \
+      --source 203.0.113.0/24
+
+Public IP ilişkilendirme (temsili):
+
+    zadara ip allocate --name pip-win-demo-01
+    zadara ip associate --ip pip-win-demo-01 --vm win-demo-01
+
+---
+
+## 5) İlk Açılış ve Kurulum
+
+- Template kullandıysan, ilk boot sonrası kullanıcı/parola ekranı gelebilir.
+- ISO ile kuruyorsan “Press any key to boot from CD/DVD…” ekranında ISO’dan başlat.
+
+Temsili başlatma/kapama:
+
+    zadara vm start  --name win-demo-01
+    zadara vm status --name win-demo-01
+    zadara vm stop   --name win-demo-01    # gerektiğinde
+
+---
+
+## 6) RDP Erişimi ve İlk Yapılandırmalar
+
+- Windows açıldıktan sonra **Administrator** hesabını etkinleştir ve parola belirle.
+- **RDP** servisini ve **Firewall** kuralını doğrula (RDP 3389 açık).
+- Saat dilimi, NIC ayarları, hostname ve Windows Update yapılandırmasını tamamla.
+
+Örnek (temsili) metadata/etiket:
+
+    zadara vm tag set --vm win-demo-01 --tag "env=demo,owner=suleyman"
+
+---
+
+## 7) Sık Karşılaşılan Sorunlar (Demo)
+
+<details>
+  <summary>RDP bağlanmıyor</summary>
+  <ul>
+    <li>Güvenlik grubunda 3389 açık mı?</li>
+    <li>VM içinde Windows Firewall kuralı açık mı?</li>
+    <li>Doğru IP/DNS'e bağlanıyor musun?</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Disk görünmüyor</summary>
+  <ul>
+    <li>Volume gerçekten ekli mi?</li>
+    <li>Windows'ta Disk Management ile initialize/format yaptın mı?</li>
+  </ul>
+</details>
+
+---
+
+## 8) Temizlik (İsteğe Bağlı)
+
+Demo ortamını kapatmak/temizlemek istersen:
+
+    zadara vm stop   --name win-demo-01
+    zadara vm delete --name win-demo-01
+    zadara volume delete --name vol-win-data
+    zadara ip release --name pip-win-demo-01
+
+---
+
+## ✅ Sonuç
+
+Bu adımlarla (demo) bir **Windows VM** oluşturma akışını MDX içinde, yalnızca Markdown + HTML kullanarak gösterdik.  
+İstediğin yere kopyala-yapıştır yapabilir, kendi gerçek komut/terimlerinle kolayca güncelleyebilirsin.
