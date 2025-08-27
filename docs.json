@@ -14,17 +14,17 @@
         "language": "en",
         "groups": [
           {
-            "group": "Getting started",
-            "pages": ["en/index", "en/quickstart", "en/development"]
+            "group": "VM Operations",
+            "pages": ["en/windows-vm", "en/linux-vm"]
           }
         ]
       },
       {
-        "language": "es",
+        "language": "tr",
         "groups": [
           {
-            "group": "Getting started",
-            "pages": ["es/overview", "es/quickstart", "es/development"]
+            "group": "Sanal Makine Operasyonları",
+            "pages": ["tr/windows-vm", "tr/linux-vm"]
           }
         ]
       }
