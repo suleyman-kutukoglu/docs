@@ -23,7 +23,7 @@ tags: ["mdx", "zadara", "windows", "vm", "demo"]
 
 - Zadara Edge Cloud portal erişimi
 - Windows Server **ISO** veya **hazır template**
-- VM’in bağlanacağı ağ (VLAN/Network) ve depolama (VPSA)
+- VM'in bağlanacağı ağ (VLAN/Network) ve depolama (VPSA)
 - RDP için güvenlik kuralı (TCP **3389**) tanımlı olmalı
 
 ---
@@ -39,13 +39,13 @@ tags: ["mdx", "zadara", "windows", "vm", "demo"]
     # Temsili: giriş değil, sadece örnek
     zadara login --username <kullanici> --password <sifre>
 
-> 💡 **İpucu:** MDX’te komut bloklarını üç backtick yerine 4 boşlukla başlatarak da yazabilirsin (bu dosyada öyle yapıyoruz).
+> 💡 **İpucu:** MDX'te komut bloklarını üç backtick yerine 4 boşlukla başlatarak da yazabilirsin (bu dosyada öyle yapıyoruz).
 
 ---
 
 ## 2) İmaj/Template Seçimi
 
-- **Template ile kurulum:** “Image/Template” listesinden `Windows Server 2022` benzeri bir imaj seç.
+- **Template ile kurulum:** "Image/Template" listesinden `Windows Server 2022` benzeri bir imaj seç.
 - **ISO ile kurulum:** ISO deposundan Windows ISO dosyasını işaretle; ilk önyüklemeyi **CD/DVD** yap.
 
 Örnek (temsili) görüntüleme ve oluşturma:
@@ -88,7 +88,7 @@ Disk ve ek volume ekleme (temsili):
 
 ## 4) Ağ ve Güvenlik
 
-1. VM’i bağlayacağın ağı seç (örn. <kbd>prod-net</kbd>).
+1. VM'i bağlayacağın ağı seç (örn. <kbd>prod-net</kbd>).
 2. Güvenlik grubunda aşağıdakileri doğrula:
    - **RDP:** TCP 3389 (kaynak: ofis IP aralığın)
    - **WinRM (opsiyonel):** TCP 5985/5986
@@ -112,7 +112,7 @@ Public IP ilişkilendirme (temsili):
 ## 5) İlk Açılış ve Kurulum
 
 - Template kullandıysan, ilk boot sonrası kullanıcı/parola ekranı gelebilir.
-- ISO ile kuruyorsan “Press any key to boot from CD/DVD…” ekranında ISO’dan başlat.
+- ISO ile kuruyorsan "Press any key to boot from CD/DVD…" ekranında ISO'dan başlat.
 
 Temsili başlatma/kapama:
 
