@@ -15,7 +15,7 @@
         "groups": [
           {
             "group": "VM Operations",
-            "pages": ["en/windows-vm", "en/linux-vm"]
+            "pages": ["en/windows-vm"]
           }
         ]
       },
@@ -24,7 +24,16 @@
         "groups": [
           {
             "group": "Sanal Makine Operasyonları",
-            "pages": ["tr/windows-vm", "tr/linux-vm"]
+            "pages": ["tr/windows-vm"]
+          }
+        ]
+      },
+      {
+        "language": "de",
+        "groups": [
+          {
+            "group": "Virtual Machine Operations",
+            "pages": ["de/windows-vm"]
           }
         ]
       }
