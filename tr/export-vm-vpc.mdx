@@ -1,0 +1,142 @@
+# VPC Projelerde Image Export Yöntemi
+
+Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç, müşteri projelerindeki sanal makinelerin (VM) image export sürecini profesyonel ve standart bir şekilde yönetmektir.
+
+---
+
+## 1. Ön Gereksinimler
+
+* Müşteri hesabında **Enforce MFA** etkinse geçici olarak devre dışı bırakılmalıdır.
+* Müşteri hesabında **FullAccess SYMP API** yetkisine sahip, MFA kapalı bir kullanıcı oluşturulmalıdır.
+
+---
+
+## 2. Export Sunucusunun Hazırlanması
+
+Yeni bir sunucu, export edilecek VM'in bulunduğu projede aşağıdaki özelliklerle oluşturulur:
+
+* **Image:** `Fedora Toolbox *`
+* **Key Pair:** `AccountAdi_ProjeAdi_Export`
+* **Instance Type:** `z4.xlarge` (4 vCPU, 16 GB RAM)
+* **Boot Disk:** Export edilecek sunucunun boyutunun **2 katı** (Örn: 100 GB VM için 200 GB disk)
+
+---
+
+## 3. Sunucuya Bağlantı
+
+Sunucuya SSH ile bağlanıldıktan sonra aşağıdaki adımlar izlenir:
+
+```bash
+curl -k https://cloud-adresi.rng.tech
+```
+
+Eğer bağlantı başarısız olursa:
+
+```bash
+echo "169.254.64.2 https://cloud-adresi.rng.tech" | sudo tee -a /etc/hosts
+curl -k https://cloud-adresi.rng.tech
+```
+
+Sonrasında SYMP güncellemesi yapılır:
+
+```bash
+symp-update -c https://cloud-adresi.rng.tech
+```
+
+---
+
+## 4. Export Script Hazırlığı
+
+1. Root yetkileri alınır:
+
+   ```bash
+   sudo -i
+   cd /home/fedora
+   ```
+
+2. Aşağıdaki gist içeriği kullanılır:
+   [Export Script Gist](https://gist.github.com/suleyman-kutukoglu/283c00f9d5037cb3b99ab9a5bca57bcc)
+
+3. İçerik `export.sh` isimli dosyaya kaydedilir.
+
+4. Dosya içerisinde aşağıdaki değişkenler düzenlenir:
+
+   * `SYMP_URL`
+   * `SYMP_USERNAME`
+   * `SYMP_DOMAIN`
+   * `SYMP_PROJECT`
+   * `SYMP_PASSWORD`
+
+5. Çalıştırılabilir hale getirilir:
+
+   ```bash
+   chmod +x export.sh
+   ```
+
+---
+
+## 5. Image Oluşturma
+
+1. Export edilecek VM kapatılır.
+2. VM üzerinde sağ tıklanarak **Create Image** seçilir.
+3. Oluşturulan image bulunur ve **UUID** değeri not edilir.
+
+---
+
+## 6. QCOW2 Dönüşüm İşlemi
+
+Aşağıdaki komut çalıştırılır:
+
+```bash
+./export <Image UUID>
+```
+
+Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
+
+---
+
+## 7. Object Storage Üzerine Yükleme
+
+> **Not:** Upload işlemi tercihen farklı bir lokasyonda bulunan object storage üzerinde yapılmalıdır. Aynı lokasyon seçilirse ek firewall kuralları gerekebilir.
+
+1. Object storage üzerinde müşteri adına bir bucket açılır: `musteriadi`
+2. Bucket seçilir ve **Permissions > Make Public > Save** işlemi uygulanır.
+
+---
+
+## 8. Dosyanın Yüklenmesi
+
+1. AWS CLI yapılandırılır:
+
+   ```bash
+   aws configure
+   ```
+
+   Girilmesi gereken bilgiler:
+
+   * Access Key
+   * Secret Key
+   * Region: `us-east-1`
+
+2. Yükleme işlemi başlatılır:
+
+   ```bash
+   aws s3 --endpoint-url="https://kullandiginiz-object.rng.tech" cp xxx.qcow2 s3://musteriadi
+   ```
+
+---
+
+## 9. Link Doğrulama ve Teslim
+
+1. Upload tamamlandıktan sonra object storage panelinden ilgili dosya seçilir.
+2. **Properties** bölümünde yer alan URL kopyalanır.
+3. Dosya indirme testi yapılır.
+4. İndirme başarılı ise link müşteriye teslim edilir.
+
+Müşteri dosyayı `7zip` gibi araçlarla açarak içeriği doğrulayabilir.
+
+---
+
+## 10. Özet
+
+Bu prosedür sayesinde müşteri sanal makineleri güvenli ve standart bir şekilde `qcow2` formatında export edilerek object storage üzerinden erişime açılır. Süreç, hem iç operasyonlar hem de müşteri teslimatı için profesyonel bir standart sağlamaktadır.
