@@ -1,8 +1,18 @@
 ---
 title: "VPC Projelerde Image Export Etme"
-description: "
-Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç, müşteri projelerindeki sanal makinelerin (VM) image export sürecini profesyonel ve standart bir şekilde yönetmektir."
+description: " Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç, müşteri projelerindeki sanal makinelerin (VM) image export sürecini profesyonel ve standart bir şekilde yönetmektir."
 ---
+
+## Başlarken
+
+Proje kimliğinizi girin:
+
+{{project_id}}
+
+### Örnek Komut
+
+````bash
+cloud config set project {{project_id}}
 
 ## 1. Ön Gereksinimler
 
@@ -28,7 +38,7 @@ Sunucuya SSH ile bağlanıldıktan sonra aşağıdaki adımlar izlenir:
 
 ```bash
 curl -k https://cloud-adresi.rng.tech
-```
+````
 
 Eğer bağlantı başarısız olursa:
 
