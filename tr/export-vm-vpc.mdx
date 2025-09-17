@@ -3,16 +3,6 @@ title: "VPC Projelerde Image Export Etme"
 description: " Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç, müşteri projelerindeki sanal makinelerin (VM) image export sürecini profesyonel ve standart bir şekilde yönetmektir."
 ---
 
-## Başlarken
-
-Proje kimliğinizi girin:
-
-{{project_id}}
-
-### Örnek Komut
-
-````bash
-cloud config set project {{project_id}}
 
 ## 1. Ön Gereksinimler
 
@@ -121,6 +111,7 @@ Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
    - Access Key
    - Secret Key
    - Region: `us-east-1`
+   - File type: json
 2. Yükleme işlemi başlatılır:
 
    ```bash
