@@ -3,7 +3,6 @@ title: "VPC Projelerde Image Export Etme"
 description: " Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç, müşteri projelerindeki sanal makinelerin (VM) image export sürecini profesyonel ve standart bir şekilde yönetmektir."
 ---
 
-
 ## 1. Ön Gereksinimler
 
 - Müşteri hesabında **Enforce MFA** etkinse geçici olarak devre dışı bırakılmalıdır.
@@ -19,6 +18,7 @@ Yeni bir sunucu, export edilecek VM'in bulunduğu projede aşağıdaki özellikl
 - **Key Pair:** `AccountAdi_ProjeAdi_Export`
 - **Instance Type:** `z4.xlarge` (4 vCPU, 16 GB RAM)
 - **Boot Disk:** Export edilecek sunucunun boyutunun **2 katı** (Örn: 100 GB VM için 200 GB disk)
+- **Network: **Default VPC Network
 
 ---
 
@@ -28,9 +28,9 @@ Sunucuya SSH ile bağlanıldıktan sonra aşağıdaki adımlar izlenir:
 
 ```bash
 curl -k https://cloud-adresi.rng.tech
-````
+```
 
-Eğer bağlantı başarısız olursa:
+Eğer bağlantı başarısız olursa (Opsiyonel adım):
 
 ```bash
 echo "169.254.64.2 https://cloud-adresi.rng.tech" | sudo tee -a /etc/hosts
@@ -47,23 +47,22 @@ symp-update -c https://cloud-adresi.rng.tech
 
 ## 4. Export Script Hazırlığı
 
-1. Root yetkileri alınır:
+1. Root yetkileri alınır ve doğru klasöre geçilir:
 
    ```bash
    sudo -i
    cd /home/fedora
    ```
-2. Aşağıdaki kod bloğu kopyalanır.
-3. İçerik `export.sh` isimli dosyaya kaydedilir.
-4. Dosya içerisinde aşağıdaki değişkenler düzenlenir:
+2. Aşağıdaki kod bloğu kopyalanır ve İçerik `export.sh` isimli dosyaya kaydedilir.
+3. Dosya içerisinde aşağıdaki değişkenler düzenlenir:
    - `SYMP_URL`
    - `SYMP_USERNAME`
    - `SYMP_DOMAIN`
    - `SYMP_PROJECT`
    - `SYMP_PASSWORD`
 
-  ```bash
-   #!/bin/bash
+```bash
+#!/bin/bash
 
 set -ex
 
@@ -127,7 +126,8 @@ do
     qemu-img convert -f raw -O qcow2 /dev/$ADDED_VOL volume_$SNAPSHOT_NAME.qcow2
   done
 done
-   ```
+```
+
 5. Çalıştırılabilir hale getirilir:
 
    ```bash
@@ -140,7 +140,7 @@ done
 
 1. Export edilecek VM kapatılır.
 2. VM üzerinde sağ tıklanarak **Create Image** seçilir.
-3. Oluşturulan image bulunur ve **UUID** değeri not edilir.
+3. Oluşturulan image bulunur (Menu \> Images) ve **UUID** değeri not edilir.
 
 ---
 
@@ -158,9 +158,9 @@ Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
 
 ## 7. Object Storage Üzerine Yükleme
 
-> **Not:** Upload işlemi tercihen farklı bir lokasyonda bulunan object storage üzerinde yapılmalıdır. Aynı lokasyon seçilirse ek firewall kuralları gerekebilir.
+> **Not:** Upload işlemi tercihen farklı bir lokasyonda bulunan (export edilen VM Konya'da ise İstanbul'daki object storage gibi) object storage üzerinde yapılmalıdır. Aynı lokasyon seçilirse ek firewall kuralları (loopback tanımı gibi) gerekebilir.
 
-1. Object storage üzerinde müşteri adına bir bucket açılır: `musteriadi`
+1. Object storage'da pratik olması açısından kendi hesabınız üzerinde müşteri adına bir bucket açılır: `musteriadi`
 2. Bucket seçilir ve **Permissions \> Make Public \> Save** işlemi uygulanır.
 
 ---
@@ -173,15 +173,15 @@ Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
    aws configure
    ```
 
-   Girilmesi gereken bilgiler:
+   Sırasıyla sizden aşağıda bilgileri isteyecektir:
    - Access Key
    - Secret Key
    - Region: `us-east-1`
-   - File type: json
+   - Output format: json
 2. Yükleme işlemi başlatılır:
 
    ```bash
-   aws s3 --endpoint-url="https://kullandiginiz-object.rng.tech" cp xxx.qcow2 s3://musteriadi
+   aws s3 --endpoint-url="https://object-<kullandiginiz object storage>.rng.tech" cp <QCOW2 Dosyası> s3://musteriadi/
    ```
 
 ---
@@ -191,7 +191,7 @@ Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
 1. Upload tamamlandıktan sonra object storage panelinden ilgili dosya seçilir.
 2. **Properties** bölümünde yer alan URL kopyalanır.
 3. Dosya indirme testi yapılır.
-4. İndirme başarılı ise link müşteriye teslim edilir.
+4. İndirme başarılı ve 7zip ile açılıyorsa link müşteriye teslim edilir.
 
 Müşteri dosyayı `7zip` gibi araçlarla açarak içeriği doğrulayabilir.
 
