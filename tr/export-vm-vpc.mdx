@@ -53,8 +53,7 @@ symp-update -c https://cloud-adresi.rng.tech
    sudo -i
    cd /home/fedora
    ```
-2. Aşağıdaki gist içeriği kullanılır:
-   [Export Script Gist](https://gist.github.com/suleyman-kutukoglu/283c00f9d5037cb3b99ab9a5bca57bcc)
+2. Aşağıdaki kod bloğu kopyalanır.
 3. İçerik `export.sh` isimli dosyaya kaydedilir.
 4. Dosya içerisinde aşağıdaki değişkenler düzenlenir:
    - `SYMP_URL`
@@ -62,6 +61,73 @@ symp-update -c https://cloud-adresi.rng.tech
    - `SYMP_DOMAIN`
    - `SYMP_PROJECT`
    - `SYMP_PASSWORD`
+
+  ```bash
+   #!/bin/bash
+
+set -ex
+
+if [ "$(whoami)" != "root" ]
+then
+  echo "Not running as root - re-executing with sudo"
+  sudo "$0" $1
+  exit
+fi
+
+IMAGE_ID=$1
+### Please configure the below ->
+export SYMP_URL=https://cloud-adresi.rng.tech
+export SYMP_USERNAME=exampleuser
+export SYMP_DOMAIN=exampleaccount
+export SYMP_PROJECT="Default Project"
+export SYMP_PASSWORD=***
+
+LOG="log_for_last_run"
+echo `date` > $LOG
+TLOG="tee -a $LOG"
+
+SYMP="symp -k"
+TOKEN=$(symp -k login $SYMP_USERNAME $SYMP_PASSWORD $SYMP_DOMAIN $SYMP_PROJECT -f value)
+SYMP="symp -k --project-token=$TOKEN"
+
+echo "Extracting own VM ID" | $TLOG
+VM_INFO=$(curl http://169.254.169.254/openstack/latest/meta_data.json)
+MYVM_ID=$(echo ${VM_INFO} | jq -r .uuid)
+echo "Own VM ID is $VM_UUID" | $TLOG
+
+## { "block_device_mapping": [ {"snapshot_id": uuid, asd: asd}, ...] }
+echo "Getting IMAGE INFO" | $TLOG
+IMAGE_INFO=$($SYMP machine-images get ${IMAGE_ID} -f json)
+IMAGE_SNAPSHOTS=$(echo ${IMAGE_INFO} | jq -r .block_device_mapping[].snapshot_id)
+for SN in ${IMAGE_SNAPSHOTS}
+do
+  # Saving current disk device names
+  LVOLUMES=($(lsblk --output NAME -d -n -e 11 | sed -z 's/\n/\|/g'))
+  echo "Currently attached devices $LVOLUMES" | $TLOG
+  LVOLUMES=${LVOLUMES}dummyeoff
+
+  echo "Cloning image snapshot: $SN" | $TLOG
+  echo "running command: volume create --source-id $SN \"volume_for_image_download\"" | $TLOG
+  VOLUME_INFO=$($SYMP volume create --source-id $SN -f json "volume_for_image_download_${IMAGE_ID}")
+  VOLUME_ID=$(echo $VOLUME_INFO | jq -r .id)
+  SNAPSHOT_INFO=$($SYMP snapshot get $SN -f json)
+  SNAPSHOT_NAME=$(echo ${SNAPSHOT_INFO} | jq -r .name)
+  echo "Attaching new volumes and waiting for them be seen by the OS" | $TLOG
+  echo "running command: vm volumes attach $MYVM_ID $VOLUME_ID" | $TLOG
+  $SYMP vm volumes attach $MYVM_ID $VOLUME_ID | $TLOG
+
+  sleep 15 # allow kernel to recognize new voles.
+  $SYMP vm get -c id -c name -c bootVolume -c volumes -c networks -c vpc_id -c instanceType $MYVM_ID 2>>$LOG || $TLOG
+  echo "vm devices:" | $TLOG
+  lsblk --output NAME -d -n -e 11 | $TLOG
+  LOCALVOLS=(`lsblk --output NAME -d -n -e 11 | egrep -v "$LVOLUMES"`)
+  for ADDED_VOL in ${LOCALVOLS[*]}
+  do
+	  echo "Detected added volume: $ADDED_VOL" | $TLOG
+    qemu-img convert -f raw -O qcow2 /dev/$ADDED_VOL volume_$SNAPSHOT_NAME.qcow2
+  done
+done
+   ```
 5. Çalıştırılabilir hale getirilir:
 
    ```bash
