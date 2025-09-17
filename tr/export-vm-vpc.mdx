@@ -1,13 +1,13 @@
-# VPC Projelerde Image Export Yöntemi
-
-Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç, müşteri projelerindeki sanal makinelerin (VM) image export sürecini profesyonel ve standart bir şekilde yönetmektir.
-
+---
+title: "VPC Projelerde Image Export Etme"
+description: "
+Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç, müşteri projelerindeki sanal makinelerin (VM) image export sürecini profesyonel ve standart bir şekilde yönetmektir."
 ---
 
 ## 1. Ön Gereksinimler
 
-* Müşteri hesabında **Enforce MFA** etkinse geçici olarak devre dışı bırakılmalıdır.
-* Müşteri hesabında **FullAccess SYMP API** yetkisine sahip, MFA kapalı bir kullanıcı oluşturulmalıdır.
+- Müşteri hesabında **Enforce MFA** etkinse geçici olarak devre dışı bırakılmalıdır.
+- Müşteri hesabında **FullAccess SYMP API** yetkisine sahip, MFA kapalı bir kullanıcı oluşturulmalıdır.
 
 ---
 
@@ -15,10 +15,10 @@ Bu dokümantasyon RNG Technology iç süreçleri için hazırlanmıştır. Amaç
 
 Yeni bir sunucu, export edilecek VM'in bulunduğu projede aşağıdaki özelliklerle oluşturulur:
 
-* **Image:** `Fedora Toolbox *`
-* **Key Pair:** `AccountAdi_ProjeAdi_Export`
-* **Instance Type:** `z4.xlarge` (4 vCPU, 16 GB RAM)
-* **Boot Disk:** Export edilecek sunucunun boyutunun **2 katı** (Örn: 100 GB VM için 200 GB disk)
+- **Image:** `Fedora Toolbox XXX (Eğer görünmüyorsa Marketplace bölümünden indirilebilir)`
+- **Key Pair:** `AccountAdi_ProjeAdi_Export`
+- **Instance Type:** `z4.xlarge` (4 vCPU, 16 GB RAM)
+- **Boot Disk:** Export edilecek sunucunun boyutunun **2 katı** (Örn: 100 GB VM için 200 GB disk)
 
 ---
 
@@ -53,20 +53,15 @@ symp-update -c https://cloud-adresi.rng.tech
    sudo -i
    cd /home/fedora
    ```
-
 2. Aşağıdaki gist içeriği kullanılır:
    [Export Script Gist](https://gist.github.com/suleyman-kutukoglu/283c00f9d5037cb3b99ab9a5bca57bcc)
-
 3. İçerik `export.sh` isimli dosyaya kaydedilir.
-
 4. Dosya içerisinde aşağıdaki değişkenler düzenlenir:
-
-   * `SYMP_URL`
-   * `SYMP_USERNAME`
-   * `SYMP_DOMAIN`
-   * `SYMP_PROJECT`
-   * `SYMP_PASSWORD`
-
+   - `SYMP_URL`
+   - `SYMP_USERNAME`
+   - `SYMP_DOMAIN`
+   - `SYMP_PROJECT`
+   - `SYMP_PASSWORD`
 5. Çalıştırılabilir hale getirilir:
 
    ```bash
@@ -100,7 +95,7 @@ Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
 > **Not:** Upload işlemi tercihen farklı bir lokasyonda bulunan object storage üzerinde yapılmalıdır. Aynı lokasyon seçilirse ek firewall kuralları gerekebilir.
 
 1. Object storage üzerinde müşteri adına bir bucket açılır: `musteriadi`
-2. Bucket seçilir ve **Permissions > Make Public > Save** işlemi uygulanır.
+2. Bucket seçilir ve **Permissions \> Make Public \> Save** işlemi uygulanır.
 
 ---
 
@@ -113,11 +108,9 @@ Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
    ```
 
    Girilmesi gereken bilgiler:
-
-   * Access Key
-   * Secret Key
-   * Region: `us-east-1`
-
+   - Access Key
+   - Secret Key
+   - Region: `us-east-1`
 2. Yükleme işlemi başlatılır:
 
    ```bash
