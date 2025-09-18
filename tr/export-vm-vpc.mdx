@@ -18,7 +18,7 @@ Yeni bir sunucu, export edilecek VM'in bulunduğu projede aşağıdaki özellikl
 - **Key Pair:** `AccountAdi_ProjeAdi_Export`
 - **Instance Type:** `z4.xlarge` (4 vCPU, 16 GB RAM)
 - **Boot Disk:** Export edilecek sunucunun boyutunun **2 katı** (Örn: 100 GB VM için 200 GB disk)
-- **Network: **Default VPC Network
+- \*\*Network: \*\*Default VPC Network
 
 ---
 
@@ -193,10 +193,37 @@ Dönüşüm tamamlandığında `qcow2` formatında dosya elde edilir.
 3. Dosya indirme testi yapılır.
 4. İndirme başarılı ve 7zip ile açılıyorsa link müşteriye teslim edilir.
 
-Müşteri dosyayı `7zip` gibi araçlarla açarak içeriği doğrulayabilir.
+QCOW2 global bir dosya formatı olduğu için müşteri ister bu dosya ile VM oluşturulabilir veya içerisinden istediği bir dosyayı alabilir.
 
----
+Aşağıdaki örnekte Windows'da QCOW2'den dosya alma adımları yer almaktadır.
 
-## 10. Özet
+## 10. Windows'da QCOW2 İçeriği Görüntüleme
+
+**1. QEMU-IMG Kurulumu**
+
+1. QEMU for Windows indirilip kurulmalıdır. (https://qemu.weilnetz.de/w64)
+2. qemu-img.exe kurulum sonrası genelde C:\\Program Files\\qemu\\ altında bulunur.
+
+**2. qcow2 → RAW Formatına Dönüştürme**
+
+PowerShell’i **Yönetici** olarak açın ve şu komutu çalıştırın:
+
+- cd "C:\\Program Files\\qemu"
+- .\\qemu-img.exe convert -O raw "C:\\Users\\Administrator\\Downloads\\\<dosya_adi\>.qcow2" "C:\\Users\\Administrator\\Downloads\\\<dosya_adi\>.raw"
+- 
+
+Not: RAW çıktısı qcow2’nin sanal boyutu kadar yer kaplar.\
+Bu nedenle hedef diskte yeterli boş alan bulunmalıdır.
+
+**3. OSFMount ile RAW Dosyasını Açma**
+
+1. OSFMount indirilip kurulmalıdır. (https://www.osforensics.com/downloads/osfmount.exe)
+2. Program açıldıktan sonra:
+   - **Mount new…** seçilir.
+   - image.raw dosyası seçilir.
+   - İmaj içindeki NTFS partition seçilip sürücü harfi atanır.
+3. Windows Explorer’da ilgili sürücü harfi altında dosyalar görüntülenebilir.
+
+## 11. Özet
 
 Bu prosedür sayesinde müşteri sanal makineleri güvenli ve standart bir şekilde `qcow2` formatında export edilerek object storage üzerinden erişime açılır. Süreç, hem iç operasyonlar hem de müşteri teslimatı için profesyonel bir standart sağlamaktadır.
