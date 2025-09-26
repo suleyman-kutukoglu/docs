@@ -17,7 +17,8 @@ Aşağıda her iki proje tipi detaylı olarak açıklanmakta ve karar sürecini 
 - Proje başına tek VLAN kullanılabilir
 - Subnet, NAT, routing ve erişim politikaları kullanıcı arayüzünden yönetilir
 - **Gelişmiş ağ bağlantıları (SSL VPN, IPSec, SD-WAN) gerektiğinde** Direct Subnet devreye alınır; bu durumda VM’lerin gateway adresleri değiştirilir ve ilgili network konfigürasyonları RNG Cloud ekibi tarafından sağlanır
-- Cloud-native bir yapı sunduğu için otomasyon (AWS API uyumluluğu), yönetilen Load Balancer, yönetilen Kubernetes ve yönetilen veritabanları (PostgreSQL, MySQL, MongoDB, Redis, SQL Server) desteklenir
+- Cloud-native bir yapı sunduğu için otomasyon (AWS API uyumluluğu), yönetilen Load Balancer, Auto-Scale, yönetilen Kubernetes ve yönetilen veritabanları (PostgreSQL, MySQL, MongoDB, Redis, SQL Server) desteklenir
+- **Auto-Scale özelliği** sayesinde kaynaklar (CPU, bellek, instance sayısı) iş yüküne göre dinamik olarak ölçeklenebilir
 
 ### Avantajlar
 
@@ -25,13 +26,12 @@ Aşağıda her iki proje tipi detaylı olarak açıklanmakta ve karar sürecini 
 - **Cloud-native mimariler** ve **Infrastructure as Code** senaryolarına tam uyum
 - Mikroservis tabanlı modern uygulamalar için ideal altyapı
 - Hibrit bağlantılar için gelişmiş entegrasyon seçenekleri
+- **Auto-Scale** ile esnek kaynak yönetimi
 
 ### Sınırlılıklar
 
 - Tek VLAN kısıtı bulunmaktadır
 - Direct Subnet kullanıldığında VPN/IPSec gibi network konfigürasyonları için RNG Cloud ekibine ihtiyaç duyulur
-
----
 
 ## DVS Proje Tipi
 
@@ -43,7 +43,7 @@ Aşağıda her iki proje tipi detaylı olarak açıklanmakta ve karar sürecini 
 - Tek projede birden fazla VLAN kullanılabilir
 - Ağ katmanı L2 VLAN bazlıdır
 - SSL VPN, IPSec ve SD-WAN desteği vardır; bu tür network işlemleri için RNG Cloud ekibine talep açılır
-- Load Balancer, AWS API uyumluluğu ve IaC desteği bulunmaz
+- Load Balancer, AWS API uyumluluğu, IaC ve Auto-Scale desteği bulunmaz
 
 ### Avantajlar
 
@@ -55,10 +55,8 @@ Aşağıda her iki proje tipi detaylı olarak açıklanmakta ve karar sürecini 
 ### Sınırlılıklar
 
 - Network düzeyinde self-service yönetim sınırlıdır
-- Cloud-native otomasyon ve API tabanlı yönetim özellikleri desteklenmez
+- Cloud-native otomasyon, Auto-Scale ve API tabanlı yönetim özellikleri desteklenmez
 - Daha çok statik, legacy iş yükleri için uygundur
-
----
 
 ## Karşılaştırmalı Tablo
 
@@ -70,17 +68,18 @@ Aşağıda her iki proje tipi detaylı olarak açıklanmakta ve karar sürecini 
 | **Real IP**              | Kullanıcı arayüzünden atanabilir                                                                                                             | RNG Cloud ekibi tarafından atanır                                                                    |
 | **Load Balancer**        | Desteklenir                                                                                                                                  | Desteklenmez                                                                                         |
 | **Otomasyon**            | AWS API uyumluluğu, IaC, yönetilen servisler (K8s, DB, LB)                                                                                   | Otomasyon desteği bulunmaz                                                                           |
+| **Auto-Scale**           | Desteklenir (iş yüküne göre dinamik kaynak ölçeklendirme)                                                                                    | Desteklenmez                                                                                         |
 | **VPN / IPSec / SD-WAN** | Desteklenir (Direct Subnet ile RNG Cloud yapılandırması gerekir)                                                                             | Desteklenir (RNG Cloud yapılandırması gerekir)                                                       |
-| **Direct Subnet**        | Mevcut; gateway değişikliği sonrası RNG firewall üzerinden yönetilir                                                                         | Yok, Firewall'dan yönetilir                                                                          |
+| **Direct Subnet**        | Mevcuttur; gateway değişikliği sonrası RNG firewall üzerinden yönetilir                                                                      | Yok, Firewall'dan yönetilir                                                                          |
 | **Kullanım Senaryosu**   | Cloud-native uygulamalar, mikroservis mimarileri, otomasyon odaklı projeler                                                                  | Geleneksel VM altyapıları, çok VLAN’lı yapılar                                                       |
-| **Avantajı**             | Yüksek esneklik, modern otomasyon, self-service yönetim                                                                                      | VLAN bazlı esneklik, tüm VM işlemleri self-service, legacy uyumluluğu                                |
+| **Avantajı**             | Yüksek esneklik, modern otomasyon, Auto-Scale, self-service yönetim                                                                          | VLAN bazlı esneklik, tüm VM işlemleri self-service, legacy uyumluluğu                                |
 | **Sınırlılığı**          | Tek VLAN, Direct Subnet sonrası network için destek talebi gerekir                                                                           | Network otomasyonu sınırlı, cloud-native özellikler desteklenmez                                     |
 
 ---
 
 ## Seçim Rehberi
 
-- **Cloud-native mimariler, modern otomasyon ve yüksek self-service kontrol isteyen projeler için → VPC tercih edilmelidir.**
+- **Cloud-native mimariler, modern otomasyon, yönetilen servisler, Auto-Scale ve yüksek self-service kontrol isteyen projeler için → VPC tercih edilmelidir.**
 - **Çok VLAN gerektiren, daha geleneksel ve statik VM tabanlı projeler için → DVS tercih edilmelidir.**
 - **Hibrit bağlantı gerektiren senaryolarda** her iki model de VPN/IPSec/SD-WAN desteği sunar. Ancak VPC’de Direct Subnet devreye alındığında, bu işlemler RNG Cloud ekibi tarafından yapılandırılır.
 
@@ -88,7 +87,7 @@ Aşağıda her iki proje tipi detaylı olarak açıklanmakta ve karar sürecini 
 
 ## Sonuç
 
-- **VPC**, modern, esnek ve otomasyon odaklı mimariler için en uygun çözümdür.
+- **VPC**, modern, esnek, Auto-Scale özellikli ve otomasyon odaklı mimariler için en uygun çözümdür.
 - **DVS**, VLAN yoğunluklu, geleneksel yapılar için pratik ve hızlı bir seçenektir.
 
-Proje tipi seçimi yapılırken iş yüklerinin doğası, ağ segmentasyonu gereksinimleri ve operasyonel yönetim tercihleri dikkate alınmalıdır.
+Proje tipi seçimi yapılırken iş yüklerinin doğası, ağ segmentasyonu gereksinimleri ve operasyonel yönetim tercihleriniz dikkate alınmalıdır.
