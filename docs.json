@@ -23,8 +23,8 @@
         "language": "tr",
         "groups": [
           {
-            "group": "Hangi Proje Tipini Seçmeliyim?",
-            "pages": ["tr/proje-tipi-secim-rehberi"]
+            "group": "Proje Operasyonları",
+            "pages": ["tr/projects/proje-tipi-secim-rehberi", "tr/projects/proje-olusturma"]
           }
         ]
       },
