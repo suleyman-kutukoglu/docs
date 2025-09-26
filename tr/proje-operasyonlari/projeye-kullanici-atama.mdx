@@ -1,0 +1,84 @@
+---
+title: "Kullanıcı Oluşturma ve Yetkilendirme"
+---
+
+Zadara Edge Cloud üzerinde kullanıcılar, projeler ve roller merkezi olarak menüde yer alan **Identity & Access** bileşeni üzerinden yönetilir.\
+Yeni kullanıcıların oluşturulması, projelere atanması ve uygun izinlerle yetkilendirilmesi aşağıdaki adımlar üzerinden gerçekleştirilir.
+
+## Kavramlar
+
+### User (Kullanıcı)
+
+- Belirli bir hesaba erişim sağlayan tanımlı kimliktir.
+- E-posta adresi ve parola ile giriş yapar.
+- En az bir projeye atanmalı ve en az bir **policy** almalıdır.
+
+### Project (Proje)
+
+- VM, storage, ağ gibi kaynakların bulunduğu mantıksal çalışma alanıdır.
+- Kullanıcıların yetkileri proje bazında tanımlanır.
+
+### Role (Rol)
+
+- Kullanıcının bir proje içindeki genel yetki seviyesini belirler.
+- Zadara Cloud Services’ta temel iki rol vardır:
+  - **Tenant Admin**
+    - Hesap düzeyinde tam yönetici yetkisine sahiptir.
+    - Proje ve kullanıcı yönetimi, kaynak limitleri, API anahtarları, politikaların atanması gibi tüm işlemleri yapabilir.
+  - **Member**
+    - Hesap veya projeye erişim sağlar fakat yönetimsel yetkileri sınırlıdır.
+    - Tanımlanmış policy’ler çerçevesinde kaynaklara erişebilir, örneğin VM oluşturabilir ya da görebilir fakat yeni proje açamaz gibi.
+
+> Not: Bir kullanıcı birden fazla projeye atanabilir.
+
+### Policy
+
+- Kullanıcının hangi işlemleri yapabileceğini tanımlar.
+- Örnekler: `FullAccess`, `ReadOnlyAccess`, `VMFullAccess`, `StorageReadOnlyAccess`.
+- Rol, **hangi API’lere erişilebileceğini** belirlerken; policy, **bu API’ler üzerinde hangi işlemlerin yapılabileceğini** sınırlar. Örneğin ReadOnlyAccess verdiğiniz bir kullanıcı sadece okuma yapabilir.
+
+## Kullanıcı Oluşturma
+
+1. Yönetim konsolunda **Identity & Access \> Accounts** bölümüne gidin ve ilgili hesabı seçin.
+2. **Users** sekmesine geçin ve **Create User** butonuna tıklayın.
+3. Açılan formda aşağıdaki bilgileri girin:
+   - **Name**: Kullanıcı adı (benzersiz olmalıdır)
+   - **Email**: Kullanıcının e-posta adresi
+   - **Password**: Parola (minimum 8 karakter, en az bir rakam, bir harf ve bir özel karakter içermelidir)
+   - **Validate Password**: Parolayı doğrulama alanı
+4. “Next” ile Permissions sekmesine ilerleyin.
+5. Yetkili olacağı projeyi/projeleri seçin.
+6. Roles alanında Member veya Tenant Admin rolünü verin.
+7. Symp API Policies bölümünde yetki seviyesini belirleyin.
+8. AWS API Policies bölümünde AWS API'leri üzerinde ne kadar yetkili olacağını belirleyin.
+9. Finish butonu ile kullanıcı oluşturma işlemini bitirin.
+
+## Kullanıcıya Proje Atama ve Yetkilendirme
+
+1. **Users  **bölümünden kullanıcıyı seçin ve **Manage Permissions** butonuna tıklayın.
+2. **Add Project** seçeneğiyle kullanıcıya en az bir proje atayın.
+3. Her proje için:
+   - **Role** seçin (Tenant Admin veya Member).
+   - **Policies** ekleyin (örneğin `FullAccess`, `ReadOnlyAccess`, `VMFullAccess`).
+4. Gerekirse birden fazla policy aynı kullanıcıya atanabilir.
+5. Seçimleri tamamladıktan sonra **Finish** ile kullanıcıyı oluşturun.
+
+## Kullanıcı Yetkilerini Düzenleme
+
+- Mevcut kullanıcıların izinleri **Manage Permissions** seçeneğiyle güncellenebilir.
+- Buradan yeni projeler ekleyebilir, rollerini değiştirebilir veya ek policy’ler tanımlayabilirsiniz.
+- Kullanıcı sistemde oturum açmışsa, yeni atanan policy’lerin etkin olabilmesi için çıkış yapıp tekrar giriş yapması gerekebilir.
+
+## Kullanıcı Yönetimi İşlemleri
+
+- **Düzenleme**: Kullanıcı adı, e-posta adresi ve parola geçerlilik süresi güncellenebilir.
+- **Parola Sıfırlama**: Tenant Admin kullanıcıları parola sıfırlayabilir. 
+- **Silme**: Kullanıcı sistemden tamamen kaldırılır, ancak kullanıcının oluşturduğu kaynaklar silinmez.
+
+## Özet
+
+- **Tenant Admin** → Tam yönetici yetkisine sahip, hesap ve projeleri yönetir.
+- **Member** → Daha sınırlı yetkilere sahiptir, tanımlanmış policy’lerle işlem yapar.
+- Kullanıcılar en az bir projeye atanmalı ve policy’ler ile sınırlandırılmalıdır.
+- Roller proje bazında atanır.
+- Policy’ler, kullanıcıların hangi işlemleri yapabileceğini kontrol eder.
