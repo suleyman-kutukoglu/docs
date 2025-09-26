@@ -24,7 +24,7 @@
         "groups": [
           {
             "group": "Proje Operasyonları",
-            "pages": ["tr/projects/proje-tipi-secim-rehberi", "tr/projects/proje-olusturma"]
+            "pages": ["tr/project-operasyonlari/proje-tipi-secim-rehberi", "tr/proje-operasyonları/proje-olusturma"]
           }
         ]
       },
