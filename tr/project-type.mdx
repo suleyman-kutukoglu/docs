@@ -1,0 +1,94 @@
+---
+title: "Proje Tipi Seçim Rehberi"
+---
+
+Zadara Edge Cloud üzerinde yeni bir proje oluştururken **VPC (Virtual Private Cloud)** ve **DVS (Distributed Virtual Switch)** olmak üzere iki farklı ağ tipi arasından seçim yapılmalıdır.
+
+Bu seçim, projenin yönetim modeli, ölçeklenebilirlik düzeyi, güvenlik kurgusu ve otomasyon kabiliyeti üzerinde doğrudan etkilidir.\
+Aşağıda her iki proje tipi detaylı olarak açıklanmakta ve karar sürecini kolaylaştıracak kapsamlı bir karşılaştırma sunulmaktadır.
+
+## VPC Proje Tipi
+
+**VPC (Virtual Private Cloud)** modeli, kullanıcıya kaynaklarını doğrudan bulut arayüzü üzerinden yönetme imkânı sunar ve cloud-native bir yaklaşıma sahiptir.
+
+### Temel Özellikler
+
+- Varsayılan olarak tüm ağ konfigürasyonları (Public IP ataması, port açma, security group yönetimi) kullanıcı tarafından self-service yapılır
+- Proje başına tek VLAN kullanılabilir
+- Subnet, NAT, routing ve erişim politikaları kullanıcı arayüzünden yönetilir
+- **Gelişmiş ağ bağlantıları (SSL VPN, IPSec, SD-WAN) gerektiğinde** Direct Subnet devreye alınır; bu durumda VM’lerin gateway adresleri değiştirilir ve ilgili network konfigürasyonları RNG Cloud ekibi tarafından sağlanır
+- Cloud-native bir yapı sunduğu için otomasyon (AWS API uyumluluğu), yönetilen Load Balancer, yönetilen Kubernetes ve yönetilen veritabanları (PostgreSQL, MySQL, MongoDB, Redis, SQL Server) desteklenir
+
+### Avantajlar
+
+- Yüksek düzeyde **self-service kontrol**
+- **Cloud-native mimariler** ve **Infrastructure as Code** senaryolarına tam uyum
+- Mikroservis tabanlı modern uygulamalar için ideal altyapı
+- Hibrit bağlantılar için gelişmiş entegrasyon seçenekleri
+
+### Sınırlılıklar
+
+- Tek VLAN kısıtı bulunmaktadır
+- Direct Subnet kullanıldığında VPN/IPSec gibi network konfigürasyonları için RNG Cloud ekibine ihtiyaç duyulur
+
+---
+
+## DVS Proje Tipi
+
+**DVS (Distributed Virtual Switch)** modeli, geleneksel VM altyapılarına yakın bir yapı sunar. VLAN tabanlı ağ mimarisi sağlar ve özellikle çok VLAN’lı senaryolar için uygundur.
+
+### Temel Özellikler
+
+- Tüm VM operasyonları (kurulum, backup, snapshot, restore, image yönetimi) kullanıcı tarafından self-service yapılabilir
+- Tek projede birden fazla VLAN kullanılabilir
+- Ağ katmanı L2 VLAN bazlıdır
+- SSL VPN, IPSec ve SD-WAN desteği vardır; bu tür network işlemleri için RNG Cloud ekibine talep açılır
+- Load Balancer, AWS API uyumluluğu ve IaC desteği bulunmaz
+
+### Avantajlar
+
+- **Çok VLAN’lı yapı** gerektiren projeler için esneklik
+- Tüm VM yaşam döngüsü işlemleri self-service yönetilebilir
+- Geleneksel VM tabanlı sistemlerden geçiş için kolay adaptasyon
+- Basit ağ topolojilerinde hızlı uygulama imkânı
+
+### Sınırlılıklar
+
+- Network düzeyinde self-service yönetim sınırlıdır
+- Cloud-native otomasyon ve API tabanlı yönetim özellikleri desteklenmez
+- Daha çok statik, legacy iş yükleri için uygundur
+
+---
+
+## Karşılaştırmalı Tablo
+
+| Kriter / Özellik         | **VPC**                                                                                                                                      | **DVS**                                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Yönetim Modeli**       | Kullanıcı tüm VM ve ağ konfigürasyonlarını self-service yönetir; Direct Subnet açıldığında network talepleri RNG Cloud ekibine yönlendirilir | Tüm VM operasyonları self-service yapılabilir; yalnızca network talepleri RNG Cloud ekibine iletilir |
+| **VLAN Kullanımı**       | Tek VLAN (proje başına)                                                                                                                      | Birden fazla VLAN aynı projede kullanılabilir                                                        |
+| **Ağ Katmanı**           | L3: routing, NAT, subnet, security group                                                                                                     | L2: VLAN tabanlı                                                                                     |
+| **Real IP**              | Kullanıcı arayüzünden atanabilir                                                                                                             | RNG Cloud ekibi tarafından atanır                                                                    |
+| **Load Balancer**        | Desteklenir                                                                                                                                  | Desteklenmez                                                                                         |
+| **Otomasyon**            | AWS API uyumluluğu, IaC, yönetilen servisler (K8s, DB, LB)                                                                                   | Otomasyon desteği bulunmaz                                                                           |
+| **VPN / IPSec / SD-WAN** | Desteklenir (Direct Subnet ile RNG Cloud yapılandırması gerekir)                                                                             | Desteklenir (RNG Cloud yapılandırması gerekir)                                                       |
+| **Direct Subnet**        | Mevcut; gateway değişikliği sonrası RNG firewall üzerinden yönetilir                                                                         | Yok, Firewall'dan yönetilir                                                                          |
+| **Kullanım Senaryosu**   | Cloud-native uygulamalar, mikroservis mimarileri, otomasyon odaklı projeler                                                                  | Geleneksel VM altyapıları, çok VLAN’lı yapılar                                                       |
+| **Avantajı**             | Yüksek esneklik, modern otomasyon, self-service yönetim                                                                                      | VLAN bazlı esneklik, tüm VM işlemleri self-service, legacy uyumluluğu                                |
+| **Sınırlılığı**          | Tek VLAN, Direct Subnet sonrası network için destek talebi gerekir                                                                           | Network otomasyonu sınırlı, cloud-native özellikler desteklenmez                                     |
+
+---
+
+## Seçim Rehberi
+
+- **Cloud-native mimariler, modern otomasyon ve yüksek self-service kontrol isteyen projeler için → VPC tercih edilmelidir.**
+- **Çok VLAN gerektiren, daha geleneksel ve statik VM tabanlı projeler için → DVS tercih edilmelidir.**
+- **Hibrit bağlantı gerektiren senaryolarda** her iki model de VPN/IPSec/SD-WAN desteği sunar. Ancak VPC’de Direct Subnet devreye alındığında, bu işlemler RNG Cloud ekibi tarafından yapılandırılır.
+
+---
+
+## Sonuç
+
+- **VPC**, modern, esnek ve otomasyon odaklı mimariler için en uygun çözümdür.
+- **DVS**, VLAN yoğunluklu, geleneksel yapılar için pratik ve hızlı bir seçenektir.
+
+Proje tipi seçimi yapılırken iş yüklerinin doğası, ağ segmentasyonu gereksinimleri ve operasyonel yönetim tercihleri dikkate alınmalıdır.

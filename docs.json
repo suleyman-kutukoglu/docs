@@ -23,8 +23,8 @@
         "language": "tr",
         "groups": [
           {
-            "group": "Sanal Makine Operasyonları",
-            "pages": ["tr/windows-vm", "tr/test-vm"]
+            "group": "Hangi Proje Tipini Seçmeliyim?",
+            "pages": ["tr/project-type"]
           }
         ]
       },
