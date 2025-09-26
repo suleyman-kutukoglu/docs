@@ -24,7 +24,7 @@
         "groups": [
           {
             "group": "Hangi Proje Tipini Seçmeliyim?",
-            "pages": ["tr/project-type"]
+            "pages": ["tr/proje-tipi-secim-rehberi"]
           }
         ]
       },
