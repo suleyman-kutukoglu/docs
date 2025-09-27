@@ -19,15 +19,25 @@
           }
         ]
       },
-      {
-        "language": "tr",
-        "groups": [
-          {
-            "group": "Proje Operasyonları",
-            "pages": ["tr/proje-operasyonlari/proje-tipi-secim-rehberi", "tr/proje-operasyonlari/proje-olusturma", "tr/proje-operasyonlari/projeye-kullanici-atama"]
-          }
-        ]
-      },
+{
+  "language": "tr",
+  "groups": [
+    {
+      "group": "Proje Operasyonları",
+      "pages": [
+        "tr/proje-operasyonlari/proje-tipi-secim-rehberi",
+        "tr/proje-operasyonlari/proje-olusturma",
+        "tr/proje-operasyonlari/projeye-kullanici-atama"
+      ]
+    },
+    {
+      "group": "VM Operasyonları",
+      "pages": [
+        "tr/vm-operasyonlari/windows-vm-kurulumu"
+      ]
+    }
+  ]
+},
       {
         "language": "de",
         "groups": [

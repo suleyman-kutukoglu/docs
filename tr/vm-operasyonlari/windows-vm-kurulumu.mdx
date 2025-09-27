@@ -1,0 +1,215 @@
+---
+title: "Windows VM Oluşturma ve Erişim"
+---
+
+Zadara Edge Cloud üzerinde **mevcut bir Windows imajından** VM oluşturmak ve erişim sağlamak için aşağıdaki adımları izleyin.
+
+## 1) VM Oluşturma Sihirbazını Açın
+
+1. **Compute → Instances** bölümüne gidin.
+2. **Create** butonuna tıklayın. Açılan sihirbaz dört sekmeden oluşur: **Compute**, **Storage**, **Networking**, **Config**.
+
+<img
+  src="/images/create-vm.png"
+  alt="Create VM"
+  style={{ width:"65%" }}
+  title="Create VM"
+/>
+
+## 2) Compute Sekmesi
+
+- **Name:** VM için bir ad girin.
+- **Create From:** **Image** seçin.
+- **Image:** Listeden Windows imajını seçin (ör. _Public - Windows Server 2025 Standard_).
+- **Instance Type:** CPU / RAM kaynak profilini seçin.
+- **Key Pair:** Windows için Administrator parolasını çözebilmek amacıyla bir **RSA (PEM)** key pair ilişkilendirin. Yeni bir anahtar oluşturmak için **\+** butonunu kullanabilirsiniz.
+- **Opsiyonel Seçimler:**
+  - **Power Up**: Sunucu oluşturulur oluşturulmaz otomatik başlatılsın. (Seçili ise VM sihirbaz tamamlandıktan sonra otomatik olarak başlar.)
+  - **High Availability**: Fiziksel arıza vb. gibi durumlarda VM’in farklı bir fiziksel host üzerinde yeniden başlatılmasını sağlar.
+  - **Protect from deletion**: VM'in sadece Tenant Admin rollerine sahip kullanıcılar tarafından silinmesine izin verir.
+  - **Create Multiple**: Aynı konfigürasyona sahip birden fazla VM oluşturmak için kullanılır.
+- **Next** ile devam edin.
+
+## 3) Storage Sekmesi
+
+- **Boot Volume:** Boot diskinin boyutunu ve tipini belirleyin.
+- **Data Volumes (İsteğe bağlı):** İhtiyaç halinde ek veri diskleri ekleyin.
+- **Next** ile ilerleyin.
+
+<img
+  src="/images/windows-vm-storage.png"
+  alt="VM Storage Configuration"
+  title="VM Storage Configuration"
+  style={{ width:"57%" }}
+/>
+
+## 4) Networking Sekmesi
+
+> Bu adımda **en az bir ağ arayüzü (NIC)** tanımlanması zorunludur. Varsayılan olarak bir tane seçilir gelir ek işlem yapmaya gerek yoktur.
+
+- **VPC Seçimi:** Mevcut VPC’lerden birini seçin. (Varsayılan VPC ile devam edebilirsiniz.)
+- **Subnet Seçimi:** Seçtiğiniz VPC içindeki bir subnet’i seçin. (Varsayılan subnet kullanılabilir.)
+- **IP Ataması:**
+  - **Automatic (DHCP)**: Sunucu otomatik IP alır (varsayılan).
+  - **Static (Manuel)**: İsterseniz seçtiğiniz subnet'den statik IP atayabilirsiniz.
+- **Security Group:** Uygun security group’u seçin veya varsayılanı bırakın. Daha sonrasında gerekli konfigürasyonu yapacağız.
+- **DNS Name:**
+  - Aynı ağ (aynı VPC/subnet) içindeki sunucuların birbirlerini isimle bulabilmesi için kısa bir DNS adı girin (ör. `my-windows`).
+  - Bu değer internal DNS kaydı olarak kullanılacak şekilde atanır ve ağ içi keşfi kolaylaştırır.
+- **Next** ile devam edin.
+- Opsiyonel olarak metadata veya etiketler ekleyebilirsiniz.
+- **Finish** ile sihirbazı tamamlayın.
+
+## 6) VM Başlatma
+
+- Eğer **Power Up** seçili değilse, oluşturulan VM’i listeden seçip **Start** ile başlatın.
+  - **Power Up** seçiliyse, VM oluşturma işlemi tamamlandıktan sonra otomatik olarak başlar.
+- **Status** alanı **Active** olduğunda VM kullanıma hazırdır.
+  - Windows VM’lerde ilk açılış sırasında gerekli sürücüler otomatik olarak yüklendiği için birkaç kez otomatik yeniden başlatma gerçekleşebilir.
+
+## 7) Elastic IP Atama
+
+RNG Cloud ortamında oluşturulan sanal sunucular varsayılan olarak public IP adresi ile gelmez.\
+İnternet erişimi sağlamak için VM’e bir **Elastic IP** atanmalıdır.
+
+1. **Compute → Instances** sayfasına gidin.
+2. İlgili VM'e sağ tıklayarak **Attach → Elastic IP** seçin.
+
+   <img
+     src="/images/attach-elastic-ip.png"
+     alt="Attach Elastic IP"
+     title="Attach Elastic IP"
+     style={{ width:"49%" }}
+   />
+3. **\+** butonuyla havuzdan yeni bir Elastic IP talep edin ve ardından OK butonuna tıklayın.
+
+   <img
+     src="/images/attach-elastic-ip-2.png"
+     alt="Attach Elastic IP"
+     title="Attach Elastic IP"
+     style={{ width:"52%" }}
+   />
+4. Ardından OK butonuna tekrar tıklayarak işlemi bitiriyoruz.
+5. Atanmış olan Elastic IP bilgisine daha sonrasında 2 şekilde ulaşabilirsiniz.
+   1. \*\*Menu → Compute → Instances \*\*bölüme gelip VM'ın adına tıklayın.
+
+   <img
+     src="/images/vm-details.png"
+     alt="VM Name"
+     title="VM Name"
+     className="mr-auto"
+     style={{ width:"65%" }}
+   />
+
+   Açılan VM detayları sayfasında Elastic IP'nizi görebilirsiniz.
+
+   <img
+     src="/images/vm-details-elastic-ip.png"
+     alt="VM Details"
+     title="VM Details"
+     className="mr-auto"
+     style={{ width:"68%" }}
+   />
+   2. \*\*Menu → VPC Networking→ Overview \*\*bölümünde görsel olarak atanmış olan Elastic IP'nizi görebilirsiniz.
+
+      <img
+        src="/images/vpc-overview.png"
+        alt="VPC Networking Overview"
+        title="VPC Networking Overview"
+        className="mr-auto"
+        style={{ width:"80%" }}
+      />
+
+   > 💡 Elastic IP, dış ağdan RDP bağlantısı kurabilmeniz için gereklidir.
+
+## 8) Security Group (Güvenlik Grubu) Yapılandırması
+
+Elastic IP atandıktan sonra, RDP bağlantısına izin verecek güvenlik kurallarının tanımlanması gerekir.
+
+Bu adımda yalnızca RDP bağlantısı (TCP 3389) için gerekli olan temel güvenlik kurallarını oluşturacağız.\
+Security Group’lar hakkında kapsamlı bilgi için [Security Group Yönetimi](/tr/network/security-groups) dokümanına göz atabilirsiniz.
+
+1. Sol üst menüden **VPC Networking → Security Groups** bölümüne gidin.
+2. VM’in bağlı olduğu security group’u seçin ve **Modify** tıklayın.. VM kurarken varsayılan olarak bıraktıysanız **default** isminde olandır.
+3. Temiz bir şekilde ilerleyebilmek için kuralların sağındaki çöp kutusu işaretiyle varsayılan gelen 3 kuralı da silin.
+
+### Yeni Kuralların Eklenmesi
+
+Aşağıdaki adımlarla iki yeni kural ekleyeceğiz:
+
+- **1. Kural:** RDP bağlantısı için dış erişimi açar (Ingress).
+- **2. Kural:** Sunucunun internete çıkabilmesi için giden trafiğe izin verir (Egress).
+
+#### 🔹 1. Kural - Ingress (Gelen Trafik)
+
+Add butonuyla yeni kural ekleyin ve aşağıdaki gibi düzenleyin.
+
+| # | Rule Type   | Protocol | Start Port | End Port | Source  |
+| --- | ----------- | -------- | ---------- | -------- | ------- |
+| 1 | **INGRESS** | **TCP**  | **3389**   | **3389** | **ANY** |
+
+Bu kural sayesinde dış ağdan (internet üzerinden) 3389 portu aracılığıyla RDP bağlantısı kurulabilir.\
+Varsayılan olarak `ANY` seçildiğinde tüm IP adreslerinden bağlantıya izin verilir. Güvenlik amacıyla dilerseniz belirli bir IP veya IP aralığı tanımlayabilirsiniz. ANY yerine SUBNET seçin ve değer olarak örneğin `85.x.x.x/32`girebilirsiniz.
+
+#### 🔹 2. Kural - Egress (Giden Trafik)
+
+| # | Rule Type  | Protocol | Start Port | End Port | Destination |
+| --- | ---------- | -------- | ---------- | -------- | ----------- |
+| 2 | **EGRESS** | **ANY**  | **ANY**    | **ANY**  | **ANY**     |
+
+Bu kural, sunucunun internete veya diğer dış kaynaklara erişebilmesini sağlar (ör. güncellemeler, lisans doğrulamaları, yazılım indirmeleri vb.).
+
+### Uygulama Sonrası Görünüm
+
+Tüm işlemleri tamamladığınızda güvenlik grubu kurallarınız aşağıdaki görseldeki gibi görünmelidir:
+
+![Security Group Modify](/images/security-group.png)
+
+> ⚠️ **Güvenlik Notu:**\
+> RDP portunu (`3389`) tüm IP adreslerine açık bırakmak yalnızca test veya geçici senaryolarda önerilir.\
+> Prod ortamlarında erişimi belirli IP adresleriyle sınırlandırmanız veya VPN üzerinden erişim sağlamanız tavsiye edilir.
+
+## 9) Windows Parolasını Alma (Get Password)
+
+Windows VM’lerde ilk Administrator oturum açma parolası, oluşturma sırasında ilişkilendirilen **Key Pair (PEM)** dosyası kullanılarak alınır.
+
+1. **Menu → Compute → Instances** ekranında ilgili VM'e sağ tıklayın ve Get Password seçeneğine tıklayın.
+
+   <img
+     src="/images/get-password.png"
+     alt="Get Password Button"
+     title="Get Password Button"
+     style={{ width:"64%" }}
+   />
+2. Ardından ilgili PEM dosyasını sürükleyip bırakın veya \*\*Browse \*\*butonu ile seçin.
+
+   <img
+     src="/images/get-password-2.png"
+     alt="Browse Your PEM"
+     title="Browse Your PEM"
+     style={{ width:"67%" }}
+   />
+3. \*\*Next \*\*butonuna tıkladığınızda size \*\*Administrator \*\*kullanıcısının parolasını verecektir.
+
+   <img
+     src="/images/get-password-3.png"
+     alt="Get Password Output"
+     title="Get Password Output"
+     style={{ width:"66%" }}
+   />
+4. Bu parolayı güvenli bir şekilde saklayın ve ilk oturumda değiştirin.
+
+> 🔐 Parola almaişlemi yalnızca VM oluşturulurken ilişkilendirilmiş RSA tabanlı Key Pair dosyasıyla yapılabilir.
+
+## 10) RDP ile Bağlantı
+
+1. Bilgisayarınızda **Remote Desktop Connection (mstsc)** veya benzeri bir RDP istemcisi açın.
+2. **Computer** alanına VM’in **Elastic IP** adresini yazın.
+3. **User name**: `Administrator`
+4. **Password**: Get Password adımında elde ettiğiniz parola.
+5. **Connect** butonuna tıklayarak bağlantı kurun.
+
+   ![Windows VM RDP Connected](/images/windows-vm-rdp.png)
+
+> 💡 İlk bağlantı sırasında Windows ilk yapılandırma adımlarını tamamlar.\
+> 🔒 Güvenlik için güçlü bir parola belirleyin ve RDP erişimini yalnızca güvenilir IP adreslerine açık bırakın.
