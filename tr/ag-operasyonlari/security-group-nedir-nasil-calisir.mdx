@@ -1,0 +1,180 @@
+---
+title: "Security Groups Nedir ve Nasıl Çalışır?"
+---
+
+Security Group’lar, **Zadara Edge Cloud** üzerinde çalışan sanal makinelerinizin  ağ trafiğini kontrol etmek için kullanılan, **stateful (durum takip eden)** güvenlik katmanlarıdır.\
+Her Security Group, bir veya birden fazla VM’e atanabilir ve gelen (Ingress) ile giden (Egress) trafiği tanımlayan kurallardan oluşur.
+
+AWS Security Group mimarisiyle tamamen uyumludur ve benzer şekilde çalışır.
+
+## 1) Security Group’un Rolü
+
+Security Group’lar, sanal makineler için bir **instance-level firewall** görevi görür.\
+Yani ağ erişim kuralları, subnet veya VLAN yerine doğrudan VM düzeyinde uygulanır.
+
+**Temel özellikler:**
+
+- Trafik **stateful** olarak izlenir (ör. SSH oturumu açıldığında, dönüş trafiğine otomatik izin verilir).
+- Gelen ve giden trafik ayrı ayrı tanımlanır (Ingress / Egress).
+- Bir VM birden fazla Security Group’a ait olabilir.
+- Aynı VM’e atanmış birden fazla Security Group varsa, tüm kurallar **birleşik şekilde** uygulanır.
+- Security Group kuralları, VM’in bağlı olduğu **network interface (NIC)** düzeyinde aktif olur.
+
+> 💡 Security Group’lar, subnet seviyesindeki ACL’lerden (Access Control List) farklı olarak **stateful** çalışır.\
+> ACL’lerde trafiğin her yönü için ayrı izin gerekirken, Security Group’lar karşı yönü otomatik olarak kabul eder.
+
+## 2) Ingress ve Egress Kuralları
+
+Security Group’lar iki tür trafik kuralı içerir:
+
+| Kural Türü            | Açıklama                                       | Örnek Kullanım                                            |
+| --------------------- | ---------------------------------------------- | --------------------------------------------------------- |
+| **Ingress (Inbound)** | VM’e gelen trafiği kontrol eder.               | Dışarıdan SSH, RDP veya HTTP erişimi açmak                |
+| **Egress (Outbound)** | VM’den dış dünyaya giden trafiği kontrol eder. | VM’in internete veya başka sistemlere erişmesini sağlamak |
+
+### Ingress (Gelen Trafik)
+
+Bir uygulamaya veya sunucuya dış dünyadan erişim gerekiyorsa (örneğin SSH veya RDP), ilgili portun **Ingress** kuralı ile açılması gerekir.
+
+**Örnek Ingress kuralları:**
+
+| # | Protocol | Port Range | Source         | Açıklama                              |
+| --- | -------- | ---------- | -------------- | ------------------------------------- |
+| 1 | TCP      | 22         | `0.0.0.0/0`    | Tüm IP’lerden SSH erişimi (önerilmez) |
+| 2 | TCP      | 22         | `85.x.x.x/32`  | Sadece ofis IP’sinden SSH erişimi     |
+| 3 | TCP      | 443        | `0.0.0.0/0`    | HTTPS erişimi                         |
+| 4 | TCP      | 3389       | `212.x.x.x/32` | Belirli ofis IP’sinden RDP erişimi    |
+
+> 🔒 **Kurumsal öneri:**\
+> Her zaman belirli IP aralıklarını tanımlayın (`/32` veya `/29` gibi). Tüm dünyaya açık (0.0.0.0/0) erişim sadece test veya geçici senaryolarda kullanılmalıdır.
+
+### Egress (Giden Trafik)
+
+VM’in dış dünyaya erişmesi (örneğin sistem güncellemeleri, API bağlantıları, DNS çözümlemesi vb.) için **Egress** kuralları kullanılır.
+
+Genellikle varsayılan olarak tüm outbound trafiğe izin verilir (`ANY → ANY`).
+
+**Örnek Egress kuralları:**
+
+| # | Protocol | Port Range | Destination | Açıklama                               |
+| --- | -------- | ---------- | ----------- | -------------------------------------- |
+| 1 | ANY      | ANY        | ANY         | Tüm dış bağlantılara izin (varsayılan) |
+| 2 | TCP      | 443        | `0.0.0.0/0` | Sadece HTTPS trafiğine izin            |
+| 3 | UDP      | 53         | `0.0.0.0/0` | DNS sorgularına izin                   |
+
+> 💡 **İpucu:**\
+> Eğer sisteminiz yalnızca dış API’lere veya belirli servis portlarına bağlanıyorsa, outbound kurallarınızı sınırlamak hem güvenliği hem ağ yönetimini iyileştirir.
+
+---
+
+## 3) Security Group’ların Uygulanma Şekli
+
+Security Group kuralları, VM’in ağ arabirimine (network interface) atanır.\
+Bu kurallar:
+
+- VM başlatıldığında otomatik uygulanır,
+- Dinamik olarak değiştirilebilir (VM’i yeniden başlatmaya gerek yoktur),
+- VPC içerisindeki diğer kaynaklarla iletişimi sınırlandırmak veya açmak için kullanılabilir.
+
+**Bağlantı Akışı:**
+
+1. Bir istemci VM’e erişmek istediğinde, gelen trafik **Ingress kuralları** üzerinden kontrol edilir.
+2. Erişim onaylandığında, bağlantı durumu Security Group tarafından “tracked” (izleniyor) olarak işaretlenir.
+3. VM’in dönüş trafiği (response) otomatik olarak izinli hale gelir — ters yönde kural tanımlamaya gerek yoktur.
+4. VM dış dünyaya erişim başlatırsa, **Egress kuralları** devreye girer.
+
+## 4) Security Group Kullanım Senaryoları
+
+### 💼 Kurumsal Kullanım Senaryosu #1 — Sadece Ofis IP’lerine Açık SSH
+
+| Rule Type | Protocol | Port Range | Source        | Açıklama                    |
+| --------- | -------- | ---------- | ------------- | --------------------------- |
+| INGRESS   | TCP      | 22         | `85.x.x.x/32` | Ofis IP’sinden SSH erişimi  |
+| EGRESS    | ANY      | ANY        | ANY           | VM dış dünyaya bağlanabilir |
+
+### 🌐 Kullanım Senaryosu #2 — Web Sunucusu (HTTP/HTTPS)
+
+| Rule Type | Protocol | Port Range | Source      | Açıklama                    |
+| --------- | -------- | ---------- | ----------- | --------------------------- |
+| INGRESS   | TCP      | 80         | `0.0.0.0/0` | HTTP erişimi                |
+| INGRESS   | TCP      | 443        | `0.0.0.0/0` | HTTPS erişimi               |
+| EGRESS    | ANY      | ANY        | ANY         | VM dış dünyaya bağlanabilir |
+
+### 🧩 Kullanım Senaryosu #3 — İç Ağ Erişimi (Private Communication)
+
+| Rule Type | Protocol | Port Range | Source              | Açıklama                                  |
+| --------- | -------- | ---------- | ------------------- | ----------------------------------------- |
+| INGRESS   | TCP      | 3306       | `db-security-group` | Web uygulaması DB sunucusuna bağlanabilir |
+| EGRESS    | ANY      | ANY        | ANY                 | Dış dünya erişimi açık                    |
+
+## 5) En İyi Uygulamalar (Best Practices)
+
+✅ **Gerektiği kadar açın:**\
+Sadece ihtiyaç duyulan portları açın (ör. 22, 80, 443).
+
+✅ **Ofis veya VPN IP aralıkları kullanın:**\
+`0.0.0.0/0` yerine belirli IP veya subnet tanımlayın.
+
+✅ **Security Group’ları isimlendirin:**\
+Her Security Group’a açıklayıcı bir ad verin (ör. `web-sg`, `bastion-sg`, `db-sg`).
+
+✅ **Egress’i izleyin:**\
+Varsayılan “Allow All” yerine belirli hedefleri sınırlamak, güvenlik denetimini artırır.
+
+✅ **Değişiklikleri dikkatle yönetin:**\
+Security Group değişiklikleri anında etkili olur — test ortamlarında deneyip sonra üretime alın.
+
+## 6) Ek Bilgi: RNG Cloud Firewall ile Kullanım
+
+Bazı projelerde kullanıcılar **RNG Cloud Firewall** üzerinden gelişmiş ağ (SSL VPN, IPSec, SD-WAN vb.) yapılarını tercih eder.\
+Bu durumda Security Group’lar, yalnızca trafiğin yönlendirilmesi amacıyla **tam açık (any/any)** konfigürasyonda bırakılabilir.
+
+| Rule Type | Protocol | Start Port | End Port | Source / Destination |
+| --------- | -------- | ---------- | -------- | -------------------- |
+| INGRESS   | ANY      | ANY        | ANY      | ANY                  |
+| EGRESS    | ANY      | ANY        | ANY      | ANY                  |
+
+> ⚙️ Bu durumda port, NAT ve erişim politikaları firewall katmanında yönetilir.\
+> Security Group yalnızca temel geçiş izni sağlar.
+
+## 7) Özet
+
+- Security Group’lar, sanal makineleriniz için **stateful firewall** işlevi görür.
+- Kurallar ikiye ayrılır: **Ingress (gelen)** ve **Egress (giden)**.
+- Her VM birden fazla Security Group’a sahip olabilir; kurallar birleşik olarak uygulanır.
+- Güvenli erişim için yalnızca gerekli portları ve IP’leri açın.
+- Firewall entegrasyonu varsa, detaylı güvenlik politikalarını firewall üzerinden yönetin.
+
+## 8) 🔧 Security Group Kuralları Nasıl Eklenir, Düzenlenir veya Silinir?
+
+Zadara Edge Cloud arayüzünde Security Group kuralları **VPC Networking → Security Groups** menüsünden yönetilir.Adım Adım İşlem
+
+1. **VPC Networking → Security Groups** menüsüne gidin.
+2. Düzenlemek istediğiniz Security Group’u seçin.
+3. Sağ üstteki **Modify** butonuna tıklayın.
+
+Buradan aşağıdaki işlemleri yapabilirsiniz:
+
+- **Yeni Kural Ekleme:**
+  - **Add** butonuna tıklayın.
+  - **Rule Type:** INGRESS (gelen) veya EGRESS (giden) seçin.
+  - **Protocol:** TCP, UDP veya ANY.
+  - **Start / End Port:** Port aralığını belirtin (ör. 22–22 veya 80–443).
+  - **Source / Destination:** IP adresi (`x.x.x.x/32`), CIDR aralığı (`10.0.0.0/24`) veya Security Group seçin.
+  - **Save** ile kaydedin.
+- **Kural Silme:**
+  - İlgili satırın sağındaki 🗑️ simgesine tıklayın.
+  - Kural anında kaldırılır.
+- **Kural Düzenleme:**
+  - Herhangi bir hücreye tıklayarak değerleri doğrudan düzenleyebilirsiniz.
+
+<img
+  src="/images/security-group.png"
+  alt="Security Group Modify"
+  title="Security Group Modify"
+  style={{ width:"75%" }}
+/>
+
+> 💡 **Not:**\
+> Yapılan tüm değişiklikler **anında etkinleşir**.\
+> VM’in yeniden başlatılmasına gerek yoktur.

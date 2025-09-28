@@ -36,6 +36,12 @@
         "tr/vm-operasyonlari/windows-vm-kurulumu",
         "tr/vm-operasyonlari/linux-vm-kurulumu"
       ]
+    },
+        {
+      "group": "Ağ Operasyonları",
+      "pages": [
+        "tr/ag-operasyonlari/security-group-nedir-nasil-calisir"
+      ]
     }
   ]
 },
@@ -112,7 +118,7 @@
       "anchors": [
         {
           "anchor": "Edge Cloud Portal",
-          "href": "https://mintlify.com/docs",
+          "href": "https://rng.tech/edgecloud",
           "icon": "cloud"
         },
         {
