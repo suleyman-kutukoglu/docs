@@ -33,7 +33,8 @@
     {
       "group": "VM Operasyonları",
       "pages": [
-        "tr/vm-operasyonlari/windows-vm-kurulumu"
+        "tr/vm-operasyonlari/windows-vm-kurulumu",
+        "tr/vm-operasyonlari/linux-vm-kurulumu"
       ]
     }
   ]
