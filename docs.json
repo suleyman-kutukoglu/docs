@@ -9,7 +9,34 @@
   },
   "favicon": "/favicon.png",
   "navigation": {
-      "languages": [
+    "languages": [
+      {
+        "language": "tr",
+        "groups": [
+          {
+            "group": "Proje Yönetimi",
+            "pages": [
+              "tr/proje-operasyonlari/proje-tipi-secim-rehberi",
+              "tr/proje-operasyonlari/proje-olusturma",
+              "tr/proje-operasyonlari/projeye-kullanici-atama",
+              "tr/proje-operasyonlari/proje-kaynak-kotasi-atama"
+            ]
+          },
+          {
+            "group": "Sanal Makine Yönetimi",
+            "pages": [
+              "tr/vm-operasyonlari/windows-vm-kurulumu",
+              "tr/vm-operasyonlari/linux-vm-kurulumu"
+            ]
+          },
+          {
+            "group": "Ağ ve Güvenlik Yönetimi",
+            "pages": [
+              "tr/ag-operasyonlari/security-group-nedir-nasil-calisir"
+            ]
+          }
+        ]
+      },
       {
         "language": "en",
         "groups": [
@@ -19,33 +46,6 @@
           }
         ]
       },
-{
-  "language": "tr",
-  "groups": [
-    {
-      "group": "Proje Yönetimi",
-      "pages": [
-        "tr/proje-operasyonlari/proje-tipi-secim-rehberi",
-        "tr/proje-operasyonlari/proje-olusturma",
-        "tr/proje-operasyonlari/projeye-kullanici-atama",
-        "tr/proje-operasyonlari/proje-kaynak-kotasi-atama"
-      ]
-    },
-    {
-      "group": "Sanal Makine Yönetimi",
-      "pages": [
-        "tr/vm-operasyonlari/windows-vm-kurulumu",
-        "tr/vm-operasyonlari/linux-vm-kurulumu"
-      ]
-    },
-        {
-      "group": "Ağ ve Güvenlik Yönetimi",
-      "pages": [
-        "tr/ag-operasyonlari/security-group-nedir-nasil-calisir"
-      ]
-    }
-  ]
-},
       {
         "language": "de",
         "groups": [
@@ -154,15 +154,15 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
