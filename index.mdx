@@ -1,0 +1,83 @@
+---
+title: "Introduction"
+description: "RNG Technology dokümantasyonu: zCompute, Object Storage, Zerto ve Veeam ile modern altyapıyı hızla yönetin."
+icon: "book-open"
+mode: "custom"
+---
+
+export const HeroCard = ({ filename, title, description, href }) => {
+  return (
+    <a className="group cursor-pointer pb-8" href={href}>
+      <img
+        src={`https://mintlify.s3.us-west-1.amazonaws.com/mintlify/images/hero/${filename}.png`}
+        className="block dark:hidden pointer-events-none group-hover:scale-105 transition-all duration-100"
+      />
+      <img
+        src={`https://mintlify.s3.us-west-1.amazonaws.com/mintlify/images/hero/${filename}-dark.png`}
+        className="pointer-events-none group-hover:scale-105 transition-all duration-100 hidden dark:block"
+      />
+      <h3 className="mt-5 text-gray-900 dark:text-zinc-50 font-medium">
+        {title}
+      </h3>
+      <span className="mt-1.5">{description}</span>
+    </a>
+  );
+};
+
+<div className="relative">
+  <div className="absolute top-0 lg:-top-16 left-0 right-0">
+    {/* Kendi arkaplanlarını kullanacaksan /public/images/hero içine koy */}
+    <img
+      src="/images/hero/background-light.png"
+      className="block dark:hidden pointer-events-none"
+    />
+    <img
+      src="/images/hero/background-dark.png"
+      className="hidden dark:block pointer-events-none"
+    />
+  </div>
+
+  <div className="px-4 py-16 lg:py-48 lg:pb-24 max-w-3xl mx-auto">
+    <h1 className="block text-4xl font-medium text-center text-gray-900 dark:text-zinc-50 tracking-tight">
+      Documentation
+    </h1>
+
+    <div className="max-w-xl mx-auto px-4 mt-4 text-lg text-center text-gray-500 dark:text-zinc-500">
+      Zadara Edge Cloud üzerinde modern altyapı. Kutudan çıktığı gibi şık, geliştiriciler için optimize ve AI-native.
+    </div>
+
+    <div className="px-6 lg:px-0 mt-12 lg:mt-24 grid sm:grid-cols-2 gap-x-6 gap-y-4">
+      {/* zCompute */}
+      <HeroCard
+        filename="rocket"
+        title="zCompute – Hızlı Başlangıç"
+        description="Dakikalar içinde ilk projenizi oluşturun, kullanıcı ve kaynak atamalarını tamamlayın."
+        href="/tr/proje-operasyonlari/proje-olusturma"
+      />
+
+      {/* Object Storage */}
+      <HeroCard
+        filename="cli"
+        title="Object Storage – Genel Bakış"
+        description="S3 uyumlu depolamaya bağlanın, erişim anahtarlarını yönetin ve örnek kullanımları inceleyin."
+        href="/tr/object-storage/overview"
+      />
+
+      {/* Zerto */}
+      <HeroCard
+        filename="editor"
+        title="Zerto – Felaket Kurtarma"
+        description="Replikasyon politikaları, test/gerçek failover senaryoları ve otomasyon adımları."
+        href="/tr/zerto/overview"
+      />
+
+      {/* Veeam */}
+      <HeroCard
+        filename="components"
+        title="Veeam – Yedekleme ve Geri Yükleme"
+        description="VM, dosya ve veritabanı yedekleri; saklama politikaları ve hızlı geri dönüş."
+        href="/tr/veeam/overview"
+      />
+    </div>
+  </div>
+</div>

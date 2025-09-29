@@ -14,26 +14,47 @@
         "language": "tr",
         "groups": [
           {
-            "group": "Proje Yönetimi",
+            "group": "zCompute",
+            "expanded": true,
             "pages": [
-              "tr/proje-operasyonlari/proje-tipi-secim-rehberi",
-              "tr/proje-operasyonlari/proje-olusturma",
-              "tr/proje-operasyonlari/projeye-kullanici-atama",
-              "tr/proje-operasyonlari/proje-kaynak-kotasi-atama"
+              {
+                "group": "Proje Yönetimi",
+                "pages": [
+                  "tr/proje-operasyonlari/proje-tipi-secim-rehberi",
+                  "tr/proje-operasyonlari/proje-olusturma",
+                  "tr/proje-operasyonlari/projeye-kullanici-atama",
+                  "tr/proje-operasyonlari/proje-kaynak-kotasi-atama"
+                ]
+              },
+              {
+                "group": "Sanal Makine Yönetimi",
+                "pages": [
+                  "tr/vm-operasyonlari/windows-vm-kurulumu",
+                  "tr/vm-operasyonlari/linux-vm-kurulumu"
+                ]
+              },
+              {
+                "group": "Ağ ve Güvenlik Yönetimi",
+                "pages": [
+                  "tr/ag-operasyonlari/security-group-nedir-nasil-calisir"
+                ]
+              }
             ]
           },
           {
-            "group": "Sanal Makine Yönetimi",
-            "pages": [
-              "tr/vm-operasyonlari/windows-vm-kurulumu",
-              "tr/vm-operasyonlari/linux-vm-kurulumu"
-            ]
+            "group": "Object Storage",
+            "expanded": true,
+            "pages": []
           },
           {
-            "group": "Ağ ve Güvenlik Yönetimi",
-            "pages": [
-              "tr/ag-operasyonlari/security-group-nedir-nasil-calisir"
-            ]
+            "group": "Zerto",
+            "expanded": true,
+            "pages": []
+          },
+          {
+            "group": "Veeam",
+            "expanded": true,
+            "pages": []
           }
         ]
       },
@@ -41,8 +62,31 @@
         "language": "en",
         "groups": [
           {
-            "group": "VM Operations",
-            "pages": ["en/windows-vm"]
+            "group": "zCompute",
+            "expanded": false,
+            "pages": [
+              {
+                "group": "VM Operations",
+                "pages": [
+                  "en/windows-vm"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Object Storage",
+            "expanded": true,
+            "pages": []
+          },
+          {
+            "group": "Zerto",
+            "expanded": true,
+            "pages": []
+          },
+          {
+            "group": "Veeam",
+            "expanded": true,
+            "pages": []
           }
         ]
       },
@@ -50,8 +94,31 @@
         "language": "de",
         "groups": [
           {
-            "group": "Virtual Machine Operations",
-            "pages": ["de/windows-vm"]
+            "group": "zCompute",
+            "expanded": true,
+            "pages": [
+              {
+                "group": "Virtual Machine Operations",
+                "pages": [
+                  "de/windows-vm"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Object Storage",
+            "expanded": true,
+            "pages": []
+          },
+          {
+            "group": "Zerto",
+            "expanded": true,
+            "pages": []
+          },
+          {
+            "group": "Veeam",
+            "expanded": true,
+            "pages": []
           }
         ]
       }
