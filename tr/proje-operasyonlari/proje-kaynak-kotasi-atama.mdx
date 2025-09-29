@@ -1,0 +1,105 @@
+---
+title: "Proje Kaynak Kotaları Yönetimi"
+---
+
+Zadara Edge Cloud üzerinde **kaynak kotaları (Resource Quotas)**, her projenin kullanabileceği maksimum kaynak miktarını belirler. \
+Kotalar, **Tenant Admin** tarafından yönetilir ve projenin CPU, bellek, depolama ve diğer kaynaklarını sınırlandırmak için kullanılır. 
+
+## 1) Kaynak Kotalarının Amacı
+
+Proje bazlı kotalar, her projenin kendi kaynaklarını adil, dengeli ve kontrollü biçimde kullanmasını sağlar.\
+Bu sistem, aynı tenant altında birden fazla projenin paralel çalıştığı durumlarda kaynak çakışmalarını önler.
+
+**Kotalar sayesinde:**
+
+- Kaynak kullanım limitleri belirlenir.
+- Aşırı tüketim engellenir.
+- Kapasite planlaması yapılabilir.
+- Kullanıcılar arasında kaynak önceliği sağlanır.
+
+> 💡 **Örnek:**\
+> “Projede en fazla 8 vCPU, 32 GB RAM ve 5 adet VM kullanılabilir.”
+
+## 2) Yönetim Yetkileri
+
+| Rol                | Yetki Düzeyi               | Açıklama                                                  |
+| ------------------ | -------------------------- | --------------------------------------------------------- |
+| **Tenant Admin**   | ✅ Kota atama ve güncelleme | Bütün projelerin kotalarını belirler veya günceller.      |
+| **Project Member** | ❌ Sadece görüntüleme       | Kotaları değiştiremez, sadece mevcut limitleri görebilir. |
+
+> ⚠️ **Not:**\
+> Tenant Admin, sadece**projesi seviyesinde**  kotalarını düzenleyebilir.
+
+## 3) Proje Kotası Atanabilen Kaynaklar
+
+Proje kotaları aşağıdaki kaynak türleri için tanımlanabilir:
+
+| Kaynak Türü                     | Açıklama                                         | Örnek Limit |
+| ------------------------------- | ------------------------------------------------ | ----------- |
+| **vCPU**                        | Toplam kullanılabilecek sanal işlemci çekirdeği  | 8           |
+| **RAM (Memory)**                | Sanal makinelerde kullanılabilecek toplam bellek | 32 GB       |
+| **Storage (Volume / Snapshot)** | Kullanılabilecek toplam disk alanı ve sayısı     | 1 TB        |
+| **Instances (VM)**              | Oluşturulabilecek maksimum VM sayısı             | 5           |
+| **Load Balancer**               | Oluşturulabilecek Load Balancer sayısı           | 2           |
+
+> 💡 Proje bazlı kotalar, yalnızca o proje altındaki kaynakları kapsar.\
+> Başka projeler veya tenant genelinde etkili değildir.
+
+## 4) Proje Kotalarını Görüntüleme
+
+1. Menüden Hesap düzeyinde görmek için **Account → Proje Adı →Limits **sekmesine gidin.
+
+Bu sekmede projenin mevcut **kullanım (Usage)** ve **limit (Quota)** değerleri birlikte görüntülenir.
+
+![project-limits.png](/images/project-limits.png)
+
+> 📊 Bu görünüm, proje kaynaklarının ne kadarının kullanıldığını takip etmenize yardımcı olur.
+
+## 5) Yeni Kota Atama veya Güncelleme
+
+Yeni kota tanımlamak veya mevcut limitleri değiştirmek için:
+
+1. Menüden **Account → Proje Adı →Limits** sayfasına gidin.
+2. Her kategoride yer alan Add butonuyla farklı kaynak tipleri için limit koyabilirsiniz.
+
+   ![project-add-limit.png](/images/project-add-limit.png)
+
+> 💡 **Not:** Kota değişiklikleri anında aktif olur.\
+> Mevcut çalışan VM’ler etkilenmez, ancak yeni kaynak oluşturulurken sistem yeni limitleri uygular.
+
+## 6) Kota Aşımı (Quota Exceeded)
+
+Kullanıcı, tanımlı kota değerini aşan bir işlem gerçekleştirmeye çalışırsa sistem bunu engeller ve uyarı verir.
+
+**Örnek senaryolar:**
+
+- Yeni VM oluşturulurken toplam vCPU sayısı limitin üzerindeyse.
+- Yeni disk (volume) eklenirken toplam depolama kotası dolmuşsa.
+
+> ⚠️ Kota aşıldığında sistem mevcut kaynakları silmez veya durdurmaz.\
+> Sadece **yeni kaynak oluşturma işlemlerini** engeller.
+
+## 7) Kota Yönetimi için Öneriler
+
+✅ **Proje başlamadan önce ihtiyaç analizini yapın.**\
+VM sayısı, CPU, RAM ve disk ihtiyaçlarını önceden planlayın.
+
+✅ **Kotaları periyodik olarak gözden geçirin.**\
+Kullanım artışına bağlı olarak limitleri gerektiğinde güncelleyin.
+
+✅ **Esnek büyüme planı oluşturun.**\
+Kotaları çok düşük tanımlamak, proje ölçeklenmesini engelleyebilir.
+
+✅ **Aşım durumlarını yönetin.**\
+Kullanıcılar kota limitine ulaştığında Tenant Admin bilgilendirilmeli ve ek kaynak tahsisi planlanmalıdır.
+
+## 8) Özet
+
+- Proje bazlı kotalar, kaynak yönetimini kolaylaştırır ve sistem yükünü dengeler.
+- Yalnızca **Tenant Admin** rolüne sahip kullanıcılar proje kotalarını düzenleyebilir.
+- Kota değişiklikleri anında uygulanır ve yalnızca yeni kaynak oluşturma işlemlerini etkiler.
+- Kotalar sayesinde her proje, tanımlı sınırlar içinde çalışarak sistem stabilitesi korunur.
+
+> 💡 **Sonuç:**\
+> Proje düzeyinde doğru tanımlanmış kotalar, hem performans hem de operasyonel sürdürülebilirlik açısından kritik öneme sahiptir.\
+> Tenant Admin, bu sayede kendi projelerini etkili şekilde yönetebilir.
