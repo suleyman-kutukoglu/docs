@@ -23,7 +23,7 @@
   "language": "tr",
   "groups": [
     {
-      "group": "Proje Operasyonları",
+      "group": "Proje Yönetimi",
       "pages": [
         "tr/proje-operasyonlari/proje-tipi-secim-rehberi",
         "tr/proje-operasyonlari/proje-olusturma",
@@ -32,14 +32,14 @@
       ]
     },
     {
-      "group": "VM Operasyonları",
+      "group": "Sanal Makine Yönetimi",
       "pages": [
         "tr/vm-operasyonlari/windows-vm-kurulumu",
         "tr/vm-operasyonlari/linux-vm-kurulumu"
       ]
     },
         {
-      "group": "Ağ Operasyonları",
+      "group": "Ağ ve Güvenlik Yönetimi",
       "pages": [
         "tr/ag-operasyonlari/security-group-nedir-nasil-calisir"
       ]
