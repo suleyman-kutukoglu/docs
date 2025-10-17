@@ -42,8 +42,8 @@
               {
                 "group": "Yedekleme ve Kurtarma",
                 "pages": [
-                  "tr/vm-operasyonlari/yedekleme-kurtarma-giris",
-                  "tr/vm-operasyonlari/protection-group-olusturma"
+                  "tr/yedekleme-ve-kurtarma/yedekleme-kurtarma-giris",
+                  "tr/yedekleme-ve-kurtarma/protection-group-olusturma"
                 ]
               }
             ]
