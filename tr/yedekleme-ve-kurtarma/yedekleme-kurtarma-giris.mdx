@@ -7,13 +7,13 @@ Bu sayfa, bu kavramların ne olduğunu, nasıl çalıştığını ve yedekleme /
 
 ## 1) Snapshot Nedir?
 
-Snapshot, bir volume’un veya VM’in belirli bir zamanda aldığı durumu (veri setini) gösteren **salt okunur, zamana bağlı bir görüntüdür**.\
+Snapshot, sanal makinenin belirli bir zamandaki salt okunur anlık görüntüsüdür. \
 Snapshot aşağıdaki özelliklere sahiptir:
 
 - Snapshot'lar istenildiğinde hızlı bir şekilde **yeni bir sanal makine** ya da **sadece dosya kurtarmak** için geri yüklenebilir.
 - Manuel veya Protection Group'lar ile belirli periyotlarda otomatik alınabilir.
-- VM seviyesinde snapshot alındığında, hem boot diski hem bağlı veri diskleri snapshot içine alınabilir.
-- Snapshot’lar “crash-consistent” (çok düşük ihtimalle anlık veritabanı tutarsızlığı olasılığı içerir) olarak çalışırlar.
+- Snapshot alındığında, hem boot diski hem bağlı veri diskleri snapshot içine alınabilir.
+- Snapshot’lar “crash-consistent” (çok düşük ihtimalle anlık veritabanı tutarsızlığı olasılığı içerir, uygulama seviyesinde snapshot almaz) olarak çalışırlar.
 
 Zadara Edge Cloud'da iki tip snapshot alabilirsiniz.
 
@@ -21,53 +21,53 @@ Zadara Edge Cloud'da iki tip snapshot alabilirsiniz.
 
 Local Snapshot'lar sanal makinenizin bulunduğu veri merkezinde aynı konumda alınan snapshotlardır.
 
-Örneğin RNG Istanbul ortamında çalışıyorsanız aldığınız Local Snapshot'lar RNG Istanbul ortamında tutulurlar.
+Örneğin RNG Cloud Istanbul ortamında çalışıyorsanız aldığınız Local Snapshot'lar RNG Istanbul ortamında tutulurlar.
 
 **Temel Özellikler:**
 
 - Hızlı geri dönüş gerektiren günlük yedekleme senaryoları için düşük gecikmeli ve düşük maliyetli bir çözümdür.
 - Sanal makine veya dosya bazında kurtarma işlemleri aynı veri merkezinde olduğundan ötürü inanılmaz hızlı gerçekleşir.
-- Sanal makinizde yapacağınız güncelleme vb. gibi kritik işlemler öncesinde local snapshot aldığınız takdirde örneğin yapacağınız güncelleme işleminde olumsuz bir durum yaşarsanız anında geri dönebilirsiniz.
+- Sanal makinenizde yapacağınız güncelleme vb. gibi kritik işlemler öncesinde local snapshot aldığınız takdirde yapacağınız güncelleme işleminde olumsuz bir durum yaşarsanız anında geri dönebilirsiniz.
 
 ### b) Remote Snapshot (B2OS)
 
-B2OS (Backup to Object Storage) bir sanal makinenin local snapshot'ının, bulunduğu veri merkezinden (Örnek İstanbul) bağımsız farklı bir veri merkezinde bulunan \*\*Zadara Object Storage ****ortamına kopyalanmasıyla oluşturulan uzaktan yedektir. Bu yapı, felaket kurtarma \*\* senaryolarında verininfarklı bir fiziksel bölgede (Örnek Konya)****  güvenli şekilde saklanmasını sağlar.
+B2OS (Backup to Object Storage) bir sanal makinenin local snapshot'ının, bulunduğu veri merkezinden (Örnek İstanbul) bağımsız farklı bir veri merkezinde bulunan \*\*Zadara Object Storage \*\*ortamına kopyalanmasıyla oluşturulan uzaktan yedektir. Bu yapı, felaket kurtarma senaryolarında verininfarklı bir fiziksel bölgede (Örnek Konya)  güvenli şekilde saklanmasını sağlar.
 
 **Temel Özellikler:**
 
 - Aktif edildiğinde local snapshot oluşturulduktan sonra otomatik olarak **Zadara Object Storage** üzerine replikasyon yapılır,
-- Farklı veri merkezleri arasında **asenkron veri koruması** sunar,
+- Farklı veri merkezleri arasında **asenkron veri koruması** sunar bu sayede coğrafi yedekliliğe sahip olursunuz,
 - Local snapshot retention süresinden bağımsız olarak saklanabilir (Örneğin local snapshot son 7 günü saklarken remote snapshot 30 gün saklanabilir),
-- Immediate Restore özelliği sayesinde restore yaparken bütün restore işlemi bitmese dahi sanal makineyi açabilir ve restore işlemi bitene kadar düşük performansta da olsa sanal makineniz çalışmaya devam eder bu sayede **İş Sürekliliği** sağlanır.
+- Immediate Restore özelliği sayesinde restore yaparken bütün restore işlemi bitmese dahi sanal makineyi açabilir ve <u>restore işlemi bitene kadar düşük performansta</u> da olsa sanal makineniz çalışmaya devam eder bu sayede **İş Sürekliliği** sağlanır.
 - Remote ortamdaki snapshot’tan restore işlemi başlatılarak sanal makineler veya dosyalarınız yeni bir proje ya da herhangi bir **Zadara Edge Cloud** ortamına geri yüklenebilir.
+- Kullanım için sanal makine başına B2OS lisansı gerektirir.
 
 > 💡 **Özet:** B2OS, Zadara’nın coğrafi olarak yedekli veri koruma çözümüdür; doğal afet, sistem arızası, yangın vb. durumlarda hızlı kurtarma sağlar.
 
 ## 2) Protection Group Nedir?
 
-Protection Group, snapshot işlemlerini otomatikleştirmek ve için kullanılan yedekleme politikası grubu (backup policy) biçimidir.\
-Zadara’da iki tip Protection Group bulunmaktadır:
+Protection Group, snapshot işlemlerini otomatikleştirmek için kullanılan yedekleme politikası grubu (backup policy) biçimidir.
 
 Protection Group’lar şu özellikleri içerir:
 
 - Snapshot periyotları (örn. her saat, her gün, haftalık)
 - Local retention süresi (snapshot’ların yerel ortamda ne kadar süre saklanacağı)
+- Remote retention süresi (remote snapshot’ların uzak ortamda ne kadar süre saklanacağı)
 - Eğer seçiliyse, local snapshot’ların Remote Object Storage’a  aktarılması
 - Kaynak ekleme / çıkarma (VM, volume) - Protection Group içindeki kaynaklar bu politika çerçevesinde korunur.
 - Sağlık durumu (Health), etkin / devre dışı durumu, son tetiklenme zamanı gibi meta bilgiler.
 
-## 3) Dikkat Edilmesi Gereken Noktalar
+## 3) Dikkat Edilmesi Gereken Noktalar ve Özet
 
 - Local snapshot’lar, sadece o projedeki kaynakları korur; coğrafi yedeklilik sağlamaz.
 - Remote backup ekstra lisans, aktarım süresi ve dış ağ bağlantısı gerektirir.
 - Snapshot’ların çok sık alınması depolama maliyetini artırabilir, retention süreleri dikkatli belirlenmelidir.
 - Kurtarma senaryolarında IP ve ağ konfigürasyonlarının doğru seçilmesi önemlidir:
 
-## 4) Özet
 
 - Snapshot’lar bir volume veya VM’in belirli andaki görüntüsünü alır.
 - Protection Group’lar snapshot politikasını yöneten yapıdaki gruplardır.
-- Local snapshot hızlı kurtarma için uygundur; remote snapshot (Object Storage) ise felaket kurtarma için elzemdir.
+- Local snapshot hızlı kurtarma için uygundur; remote snapshot (Object Storage) ise felaket kurtarma ve iş sürekliliği için elzemdir.
 
 ## Sonraki Adım: Protection Group Oluşturma
 
