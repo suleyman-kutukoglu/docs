@@ -1,0 +1,107 @@
+---
+title: "Protection Group Oluşturma"
+---
+
+Zadara Edge Cloud’da **Protection Group**, belirli sanal makineler ve diskler için snapshot politikalarını tanımlayan yedekleme grubudur.
+
+Protection Group'u ister kendiniz arayüzden oluşturabilir isterseniz sadece RNG Cloud Admin'leri tarafından yönetilmesini talep edebilirsiniz. Fonksiyonel olarak bir fark yoktur. RNG Cloud Admin'lerinin yönetmesini istediğiniz senaryoda hesabınızın yöneticisi dahil hiç kimse hesabınızdaki snapshotları silemez veya sanal makine ekleme/çıkartma yapamaz. RNG Cloud Admin'lerinin yönetmesini istiyorsanız eğer [support@rng.tech](mailto:support@rng.tech) adresine durumu bildiren bir çağrı talebi yapabilirsiniz.\
+\
+Bu bölümde hem **local** **(aynı veri merkezi içinde)** hem de **remote (farklı veri merkezi farklı coğrafi lokasyon)** koruma süreçlerini Konya veri merkezindeki “Application Server” ve “File Server” sanal makineleri üzerinden örneklerle anlatacağız.
+
+## 1) Protection Group Kavramı & Temel Özellikler
+
+Protection Group’lar, yedekleme için politika tanımlarıdır: snapshot sıklığı, retention (saklama süresi) ve opsiyonel olarak uzak object storage'a (remote) yedeklemeyi içerir.\
+Local snapshot’lar ve remote (B2OS) snapshot’lar aynı politika içinde yönetilebilir. Backup to Object Storage özelliği opsiyoneldir fakat coğrafi yedeklilik sağlanabilmesi adına kesinlikle aktif edilmelidir.
+
+**Özellikler:**
+
+- Local snapshot’lar belirlenen periyotlarla alınır ve aynı veri merkezinde tutulur.
+- Eğer remote backup seçilirse, alınan local snapshotların bir kopyası seçilen uzak Object Storage'a gönderilir (Örnek Konya \>\>\> İstanbul)
+- Remote retention (uzak yedek saklama süresi) ve local retention (yerel saklama süresi) farklı tanımlanabilir (24 saatte bir local snapshot alınıp 7 gün boyunca saklarken aynı snapshotların remote lokasyona gönderilenleri 30 gün saklansın gibi)
+- VM seviyesinde **crash-consistent** snapshot desteği sunar (tüm bağlı diskler tutarlı şekilde alınır)
+
+> 📌 Örnek senaryo:\
+> Konya’daki Zadara Edge Cloud'da çalışan Application Server ve File Server sanal makinelerini bir Protection Group’a alıp, her 24 saatte bir local snapshot almak ve alınan her local snapshot'u otomatik bir şekilde İstanbul Object Storage'a göndermek.
+
+## 2) Protection Group Oluşturma Adımları
+
+Protection group oluştururken en doğru adım hem local hem de remote snapshot alabilecek şekilde yapılandırmaktır. Dolayısıyla öncelikle bir Zadara Object Storage hesabı oluşturulmalıdır. \
+\
+Zadara Object Storage hesabını oluşturmak için:  https://rng.tech/tr/objectstorage
+
+1. Object Storage hesabınızda aşağıdaki gibi bir bucket oluşturun.
+
+   ![Create Bucket](/images/create-bucket.png)
+1. Ardından sağ üstteki kullanıcı adınıza tıklayın ve S3 Access Key, S3 Secret Key, API Endpoint bilgilerini kopyalayıp bir yere kaydedin. 
+
+   ![Object Credentials Pn](/images/object-credentials.png)
+
+   **Protection → Protection Groups** menüsüne gidin.
+2. **Backup Protection Groups** sekmesinde **\+ Create** butonuna tıklayın.
+3. “Group” sekmesinde gerekli bilgileri girin:
+   - **Name:** Örneğin `AppFile-PG`
+   - **Description:** Opsiyonel, örneğin “Konya’da App + File VM’leri için yedekleme grubu”
+   - **Backup to Object Store:** Açmak istersen B2OS seçeneğini aktif edin
+   - Eğer aktifse, **External Endpoint** kısmından B2OS bucket seçin
+   - **Local Retention Days**: Yerel snapshot’ların kaç gün saklanacağı
+   - **Remote Retention Days** (eğer aktifse): Uzak snapshot’ların kaç gün saklanacağı :contentReference[oaicite:3]index=3
+4. “Schedule” sekmesine geçin:
+   - **Local Snapshots:** Periyot seçin (örneğin **Every 1 Hour**)
+   - Başlangıç zamanı (örneğin saat 00:00)
+   - Eğer remote yedekleme aktifse, **Remote Snapshots Every** alanı ile kaç local snapshot’tan sonra remote aktarım yapılacağını belirleyin :contentReference[oaicite:4]index=4
+5. **Finish** butonuna tıklayın. Protection Group oluşturulur ve listede görünür.
+6. Oluşturulan grubu seçerek **Modify**, **Disable**, **Trigger Now**, **Delete** gibi işlemleri gerçekleştirebilirsiniz. :contentReference[oaicite:5]index=5
+
+---
+
+## 3) VM’leri Protection Group’a Ekleme / Çıkarma
+
+Protection Group oluşturduktan sonra, ilgili VM’leri ve volumelarını bu gruba ekleyebilirsiniz:
+
+- Protection Group detay sayfasında **Protected Resources** sekmesine gidin.
+- **\+ Add VM** ile VM listesinden **Application Server** ve **File Server** VM’lerini seçin ve ekleyin.
+- VM’e bağlı volumelar otomatik olarak grup içine dahil edilir. Eğer bir volume daha önce bağımsız olarak korunuyorsa, önce o korumayı kaldırıp sonra VM eklemek gerekebilir. :contentReference[oaicite:6]index=6
+- VM çıkarılması istenirse, ilgili VM satırındaki **Remove** seçilerek grup dışına alabilirsiniz.
+
+---
+
+## 4) Local Snapshot Yönetimi
+
+- Oluşturulan Protection Group’un detay sayfasında **Local Snapshots** sekmesinde tüm lokal snapshot’ları görebilirsiniz.
+- Her snapshot için **Restore**, **Delete** gibi işlemler mevcuttur.
+- Retention süresine ulaşılan snapshot’lar sistem tarafından otomatik silinir.
+
+---
+
+## 5) Remote Snapshot / B2OS Yönetimi
+
+Eğer Protection Group’u remote backup ile yapılandırdıysanız:
+
+- **Remote Snapshots** sekmesinde B2OS üzerinde tutulan snapshot’ları görebilir, **Delete** işlemi uygulanabilir.
+- Remote snapshot retention süresi dolunca eski snapshot’lar otomatik olarak B2OS ortamından silinir.
+- Restore işlemleri sırasında remote snapshot üzerinden VM veya volume geri yükleme yapılabilir; başka projelere de restore senaryoları mümkündür (Restore Protection Group). :contentReference[oaicite:7]index=7
+
+---
+
+## 6) Örnek Politika Tablosu
+
+Aşağıda `Konya-AppFile-PG` adlı Protection Group için örnek bir politika tablosu örneği verilmiştir:
+
+| Parametre             | Değer                                 |
+| --------------------- | ------------------------------------- |
+| Name                  | `Konya-AppFile-PG`                    |
+| Description           | “App + File VM’leri için yedek grubu” |
+| Local Snapshots       | Every **1 Hour**                      |
+| Remote Backup         | **Enabled**                           |
+| Remote Transfer After | 4 local snapshots                     |
+| Local Retention       | 7 gün                                 |
+| Remote Retention      | 30 gün                                |
+
+---
+
+## 7) Sonraki Adım
+
+Artık **Protection Group oluşturmayı** öğrendiniz.\
+Bir sonraki içerikte, bu Protection Group kullanılarak adım adım **snapshot alma**, “Restore” işlemleri ve farklı senaryolar üzerinde uygulamalı örnekler göstereceğiz.
+
+👉 Devam etmek için [Snapshot Alma & Restore Rehberi](/tr/vm-operasyonlari/snapshot-restore) sayfasına geçin.
